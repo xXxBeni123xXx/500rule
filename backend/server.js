@@ -9,11 +9,45 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Environment variables
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '484e50973amsh5233777f12a5b90p164f19jsn3edff15294e5';
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
+
+if (!RAPIDAPI_KEY) {
+  console.warn('⚠️ WARNING: RAPIDAPI_KEY is not set. API features will be limited to local data.');
+}
+
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      'http://localhost:4173',
+      process.env.CORS_ORIGIN
+    ].filter(Boolean);
+    
+    // Allow requests with no origin (like mobile apps or Postman)
+    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  next();
+});
 
 // In-memory cache
 let cameraCache = [];
@@ -146,6 +180,66 @@ async function updateCacheFromAPI() {
   }
 }
 
+// Rate limiting
+const requestCounts = new Map();
+const RATE_LIMIT_WINDOW = 60000; // 1 minute
+const MAX_REQUESTS = 100;
+
+const rateLimiter = (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  
+  if (!requestCounts.has(ip)) {
+    requestCounts.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW });
+    return next();
+  }
+  
+  const userRequests = requestCounts.get(ip);
+  
+  if (now > userRequests.resetTime) {
+    userRequests.count = 1;
+    userRequests.resetTime = now + RATE_LIMIT_WINDOW;
+    return next();
+  }
+  
+  if (userRequests.count >= MAX_REQUESTS) {
+    return res.status(429).json({
+      success: false,
+      error: 'Too many requests. Please try again later.'
+    });
+  }
+  
+  userRequests.count++;
+  next();
+};
+
+// Input validation middleware
+const validateQueryParams = (allowedParams) => {
+  return (req, res, next) => {
+    const queryKeys = Object.keys(req.query);
+    const invalidParams = queryKeys.filter(key => !allowedParams.includes(key));
+    
+    if (invalidParams.length > 0) {
+      return res.status(400).json({
+        success: false,
+        error: `Invalid query parameters: ${invalidParams.join(', ')}`
+      });
+    }
+    
+    // Sanitize string inputs
+    for (const key of queryKeys) {
+      if (typeof req.query[key] === 'string') {
+        req.query[key] = req.query[key].trim().substring(0, 100);
+      }
+    }
+    
+    next();
+  };
+};
+
+// Apply rate limiting to all routes
+app.use(rateLimiter);
+
 // API Routes
 
 // Health check endpoint
@@ -160,7 +254,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // Get all cameras
-app.get('/api/cameras', async (req, res) => {
+app.get('/api/cameras', validateQueryParams(['brand', 'mount', 'sensor_format']), async (req, res) => {
   try {
     // Refresh cache if needed
     if (shouldRefreshCache()) {
@@ -171,10 +265,24 @@ app.get('/api/cameras', async (req, res) => {
       }
     }
     
+    let cameras = [...cameraCache];
+    const { brand, mount, sensor_format } = req.query;
+    
+    // Apply filters
+    if (brand) {
+      cameras = cameras.filter(c => c.brand?.toLowerCase() === brand.toLowerCase());
+    }
+    if (mount) {
+      cameras = cameras.filter(c => c.mount?.toLowerCase() === mount.toLowerCase());
+    }
+    if (sensor_format) {
+      cameras = cameras.filter(c => c.sensor_format?.toLowerCase() === sensor_format.toLowerCase());
+    }
+    
     res.json({
       success: true,
-      data: cameraCache,
-      count: cameraCache.length,
+      data: cameras,
+      count: cameras.length,
       cached_at: new Date(lastCacheUpdate).toISOString()
     });
   } catch (error) {
@@ -183,9 +291,9 @@ app.get('/api/cameras', async (req, res) => {
 });
 
 // Get lenses (with optional camera_id, brand, or mount filter)
-app.get('/api/lenses', async (req, res) => {
+app.get('/api/lenses', validateQueryParams(['camera_id', 'brand', 'mount', 'type', 'category']), async (req, res) => {
   try {
-    const { camera_id, brand, mount } = req.query;
+    const { camera_id, brand, mount, type, category } = req.query;
     let lenses = [...lensCache];
     
     // Filter by camera compatibility
