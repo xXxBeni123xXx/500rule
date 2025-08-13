@@ -1,116 +1,96 @@
 import React from 'react';
-import { Camera, CAMERA_FORMATS } from '../types/camera';
+import { motion } from 'framer-motion';
+import { Camera as CameraIcon, Search, X, ChevronRight } from 'lucide-react';
+import { useAppContext, appActions } from '../contexts/AppContext';
+import { useSearch } from '../hooks/useSearch';
 
-type CameraPickerProps = {
-  cameras: Camera[] | null;
-  selectedCamera: Camera | null;
-  selectedFormat: string;
-  customCropFactor: number | null;
-  onCameraChange: (camera: Camera | null) => void;
-  onFormatChange: (format: string) => void;
-  onCustomCropFactorChange: (cropFactor: number | null) => void;
-  loading?: boolean;
-};
+export function CameraPicker() {
+  const { state, dispatch } = useAppContext();
+  const { filteredCameras } = useSearch();
 
-export const CameraPicker: React.FC<CameraPickerProps> = ({
-  cameras,
-  selectedCamera,
-  selectedFormat,
-  customCropFactor,
-  onCameraChange,
-  onFormatChange,
-  onCustomCropFactorChange,
-  loading = false
-}) => {
-  const handleCustomCropFactorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    onCustomCropFactorChange(isNaN(value) ? null : value);
+  const handleCameraSelect = (camera: any) => {
+    dispatch(appActions.setSelectedCamera(camera));
   };
 
-  // If cameras API is available, show camera dropdown
-  if (cameras !== null) {
-    return (
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Select Camera
-          </label>
-          <select
-            value={selectedCamera?.id || ''}
-            onChange={(e) => {
-              const camera = cameras.find(c => c.id?.toString() === e.target.value) || null;
-              onCameraChange(camera);
-            }}
-            className="select-field"
-            disabled={loading}
-          >
-            <option value="">Choose a camera...</option>
-            {cameras.map((camera) => (
-              <option key={camera.id} value={camera.id}>
-                {camera.brand} {camera.name}
-              </option>
-            ))}
-          </select>
-          {loading && (
-            <p className="text-sm text-gray-500">Loading cameras...</p>
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(appActions.setCameraSearchTerm(e.target.value));
+  };
+
+  const clearSearch = () => {
+    dispatch(appActions.setCameraSearchTerm(''));
+  };
+
+  return (
+    <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+      <div className="flex items-center gap-3 mb-6">
+        <CameraIcon className="h-6 w-6 text-blue-400" />
+        <h2 className="text-xl font-semibold text-white">Select Camera</h2>
+      </div>
+
+      {/* Camera Search */}
+      <div className="mb-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <input
+            type="text"
+            placeholder="Search cameras... (e.g., Canon R5, Sony A7, etc.)"
+            value={state.cameraSearchTerm}
+            onChange={handleSearchChange}
+            className="w-full pl-10 pr-10 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all"
+          />
+          {state.cameraSearchTerm && (
+            <button
+              onClick={clearSearch}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 hover:text-white transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
           )}
         </div>
-        
-        {selectedCamera && (
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600">
-              Format: {selectedCamera.sensor_format || 'Unknown'}
-              {selectedCamera.crop_factor && (
-                <span className="ml-2">
-                  (Crop Factor: {selectedCamera.crop_factor})
-                </span>
-              )}
-            </p>
-          </div>
+        {state.cameraSearchTerm && (
+          <p className="text-xs text-slate-400 mt-2">
+            Found {filteredCameras.length} camera{filteredCameras.length !== 1 ? 's' : ''}
+          </p>
         )}
       </div>
-    );
-  }
 
-  // Fallback to manual format selection
-  return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Camera Format
-        </label>
-        <select
-          value={selectedFormat}
-          onChange={(e) => onFormatChange(e.target.value)}
-          className="select-field"
-        >
-          <option value="">Choose a format...</option>
-          {CAMERA_FORMATS.map((format) => (
-            <option key={format.name} value={format.name}>
-              {format.name} (Crop Factor: {format.cropFactor})
-            </option>
-          ))}
-        </select>
+      <div className="space-y-3 max-h-96 overflow-y-auto">
+        {filteredCameras.map((camera) => (
+          <motion.button
+            key={camera.id}
+            onClick={() => handleCameraSelect(camera)}
+            className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+              state.selectedCamera?.id === camera.id
+                ? 'border-blue-400 bg-blue-400/20 text-white'
+                : 'border-white/20 bg-white/5 text-slate-300 hover:border-white/40 hover:bg-white/10'
+            }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="font-medium">{camera.brand} {camera.name}</div>
+                <div className="text-sm opacity-75">
+                  {camera.sensor_format} • {camera.crop_factor}× • {camera.megapixels}MP
+                </div>
+              </div>
+              {state.selectedCamera?.id === camera.id && (
+                <ChevronRight className="h-5 w-5 text-blue-400" />
+              )}
+            </div>
+          </motion.button>
+        ))}
       </div>
 
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Custom Crop Factor (Optional)
-        </label>
-        <input
-          type="number"
-          step="0.1"
-          min="0.1"
-          max="10"
-          value={customCropFactor || ''}
-          onChange={handleCustomCropFactorChange}
-          className="input-field"
-          placeholder="e.g., 1.5"
-        />
-        <p className="text-xs text-gray-500">
-          Leave empty to use the format's default crop factor
-        </p>
-      </div>
+      {state.loading && (
+        <div className="flex items-center justify-center py-8">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-6 h-6 border-2 border-blue-400 border-t-transparent rounded-full"
+          />
+        </div>
+      )}
     </div>
   );
-}; 
+} 

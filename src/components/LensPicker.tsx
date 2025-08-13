@@ -1,120 +1,177 @@
-import React, { useState, useMemo } from 'react';
-import { Lens } from '../types/lens';
-import { parseFocalLength, formatFocalLength } from '../utils/focal';
-import { parseAperture } from '../utils/astro';
+import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Circle as LensIcon, Search, X, ChevronRight, Camera as CameraIcon } from 'lucide-react';
+import { useAppContext, appActions } from '../contexts/AppContext';
+import { useSearch } from '../hooks/useSearch';
+import { parseFocalLength } from '../utils/focal';
 
-type LensPickerProps = {
-  lenses: Lens[];
-  selectedLens: Lens | null;
-  onLensChange: (lens: Lens | null) => void;
-  loading?: boolean;
-};
+export function LensPicker() {
+  const { state, dispatch } = useAppContext();
+  const { filteredLenses } = useSearch();
 
-export const LensPicker: React.FC<LensPickerProps> = ({
-  lenses,
-  selectedLens,
-  onLensChange,
-  loading = false
-}) => {
-  const [searchTerm, setSearchTerm] = useState('');
+  const handleLensSelect = (lens: any) => {
+    dispatch(appActions.setSelectedLens(lens));
+  };
 
-  const filteredLenses = useMemo(() => {
-    if (!searchTerm) return lenses;
-    
-    const term = searchTerm.toLowerCase();
-    return lenses.filter(lens => 
-      lens.name?.toLowerCase().includes(term) ||
-      lens.focal_length?.toLowerCase().includes(term) ||
-      lens.maximum_aperture?.toLowerCase().includes(term)
-    );
-  }, [lenses, searchTerm]);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(appActions.setLensSearchTerm(e.target.value));
+  };
 
-  const getLensDisplayName = (lens: Lens): string => {
-    const parts = [];
-    
-    if (lens.name) {
-      parts.push(lens.name);
-    }
-    
-    if (lens.focal_length) {
-      const parsed = parseFocalLength(lens.focal_length);
-      if (parsed) {
-        parts.push(formatFocalLength(parsed));
-      } else {
-        parts.push(lens.focal_length);
-      }
-    }
-    
-    if (lens.maximum_aperture) {
-      const aperture = parseAperture(lens.maximum_aperture);
-      if (aperture) {
-        parts.push(`f/${aperture}`);
-      } else {
-        parts.push(lens.maximum_aperture);
-      }
-    }
-    
-    return parts.join(' ') || `Lens ${lens.id}`;
+  const clearSearch = () => {
+    dispatch(appActions.setLensSearchTerm(''));
+  };
+
+  const handleFocalLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(appActions.setCurrentFocalLength(parseInt(e.target.value)));
+  };
+
+  const handleManualFocalLengthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value ? parseFloat(e.target.value) : null;
+    dispatch(appActions.setManualFocalLength(value));
   };
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Select Lens
-        </label>
-        
-        <input
-          type="text"
-          placeholder="Search lenses..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="input-field"
-        />
-        
-        <select
-          value={selectedLens?.id || ''}
-          onChange={(e) => {
-            const lens = lenses.find(l => l.id.toString() === e.target.value) || null;
-            onLensChange(lens);
-          }}
-          className="select-field"
-          disabled={loading}
-          size={8}
-        >
-          <option value="">Choose a lens...</option>
-          {filteredLenses.map((lens) => (
-            <option key={lens.id} value={lens.id}>
-              {getLensDisplayName(lens)}
-            </option>
-          ))}
-        </select>
-        
-        {loading && (
-          <p className="text-sm text-gray-500">Loading lenses...</p>
-        )}
-        
-        {!loading && filteredLenses.length === 0 && lenses.length > 0 && (
-          <p className="text-sm text-gray-500">No lenses match your search.</p>
-        )}
+    <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20">
+      <div className="flex items-center gap-3 mb-6">
+        <LensIcon className="h-6 w-6 text-purple-400" />
+        <h2 className="text-xl font-semibold text-white">Compatible Lenses</h2>
       </div>
 
-      {selectedLens && (
-        <div className="p-3 bg-gray-50 rounded-lg space-y-2">
-          <h4 className="font-medium text-gray-900">Selected Lens</h4>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p><strong>Name:</strong> {selectedLens.name || 'N/A'}</p>
-            <p><strong>Focal Length:</strong> {selectedLens.focal_length || 'N/A'}</p>
-            <p><strong>Max Aperture:</strong> {selectedLens.maximum_aperture || 'N/A'}</p>
-            {selectedLens.lens_mount && (
-              <p><strong>Mount:</strong> {selectedLens.lens_mount}</p>
-            )}
-            {selectedLens.image_stabilization && (
-              <p><strong>Image Stabilization:</strong> {selectedLens.image_stabilization}</p>
+      {/* Lens Search - only show when camera is selected */}
+      {state.selectedCamera && (
+        <div className="mb-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search lenses... (e.g., 24-70, f/2.8, telephoto, etc.)"
+              value={state.lensSearchTerm}
+              onChange={handleSearchChange}
+              className="w-full pl-10 pr-10 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-slate-400 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400/20 transition-all"
+            />
+            {state.lensSearchTerm && (
+              <button
+                onClick={clearSearch}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400 hover:text-white transition-colors"
+              >
+                <X className="h-4 w-4" />
+              </button>
             )}
           </div>
+          {state.lensSearchTerm && (
+            <p className="text-xs text-slate-400 mt-2">
+              Found {filteredLenses.length} lens{filteredLenses.length !== 1 ? 'es' : ''}
+            </p>
+          )}
         </div>
       )}
+
+      <AnimatePresence mode="wait">
+        {!state.selectedCamera ? (
+          <motion.div
+            key="no-camera"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-center py-12 text-slate-400"
+          >
+            <CameraIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>Select a camera to see compatible lenses</p>
+          </motion.div>
+        ) : filteredLenses.length === 0 ? (
+          <motion.div
+            key="no-lenses"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="text-center py-12 text-slate-400"
+          >
+            <LensIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>
+              {state.lensSearchTerm 
+                ? `No lenses match "${state.lensSearchTerm}"` 
+                : 'No compatible lenses found'
+              }
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="lenses"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="space-y-3 max-h-96 overflow-y-auto"
+          >
+            {filteredLenses.map((lens) => (
+              <motion.button
+                key={lens.id}
+                onClick={() => handleLensSelect(lens)}
+                className={`w-full p-4 rounded-xl border-2 transition-all duration-200 text-left ${
+                  state.selectedLens?.id === lens.id
+                    ? 'border-purple-400 bg-purple-400/20 text-white'
+                    : 'border-white/20 bg-white/5 text-slate-300 hover:border-white/40 hover:bg-white/10'
+                }`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                layout
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="font-medium">{lens.brand} {lens.name}</div>
+                    <div className="text-sm opacity-75">
+                      {lens.focal_length}mm • {lens.max_aperture} • {lens.category}
+                    </div>
+                  </div>
+                  {state.selectedLens?.id === lens.id && (
+                    <ChevronRight className="h-5 w-5 text-purple-400" />
+                  )}
+                </div>
+              </motion.button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Focal Length Controls */}
+      <AnimatePresence>
+        {state.selectedLens && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mt-6 pt-6 border-t border-white/20"
+          >
+            {parseFocalLength(state.selectedLens.focal_length)?.type === 'zoom' && (
+              <div className="space-y-4">
+                <label className="block text-sm font-medium text-white">
+                  Focal Length: {state.currentFocalLength}mm
+                </label>
+                <input
+                  type="range"
+                  min={parseFocalLength(state.selectedLens.focal_length)?.min || 24}
+                  max={parseFocalLength(state.selectedLens.focal_length)?.max || 70}
+                  value={state.currentFocalLength}
+                  onChange={handleFocalLengthChange}
+                  className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer slider"
+                />
+              </div>
+            )}
+            
+            <div className="mt-4">
+              <label className="block text-sm font-medium text-white mb-2">
+                Manual Override (mm)
+              </label>
+              <input
+                type="number"
+                value={state.manualFocalLength || ''}
+                onChange={handleManualFocalLengthChange}
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-slate-400"
+                placeholder="Custom focal length..."
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
-}; 
+} 
