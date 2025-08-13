@@ -9,7 +9,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Environment variables
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '484e50973amsh5233777f12a5b90p164f19jsn3edff15294e5';
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY;
 
 // Middleware
 app.use(cors());

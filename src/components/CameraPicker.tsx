@@ -1,5 +1,5 @@
-import React from 'react';
-import { Camera, CAMERA_FORMATS } from '../types/camera';
+import { CAMERA_FORMATS } from '../types/camera';
+import type { Camera } from '../types/camera';
 
 type CameraPickerProps = {
   cameras: Camera[] | null;

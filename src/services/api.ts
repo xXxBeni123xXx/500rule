@@ -95,10 +95,10 @@ export async function getCompatibilityInfo(cameraId: string): Promise<Compatibil
   }
 }
 
-// Fetch available brands
-export async function fetchBrands(): Promise<{ cameras: string[]; lenses: string[]; all: string[] }> {
+// Fetch available brands (camera brands)
+export async function fetchBrands(): Promise<string[]> {
   try {
-    const response = await api.get<ApiResponse<{ cameras: string[]; lenses: string[]; all: string[] }>>('/brands');
+    const response = await api.get<ApiResponse<string[]>>('/brands');
     
     if (response.data.success) {
       return response.data.data;
@@ -111,7 +111,9 @@ export async function fetchBrands(): Promise<{ cameras: string[]; lenses: string
 }
 
 // Health check
-export async function checkHealth(): Promise<any> {
+export interface HealthResponse { status: string; cameras: number; lenses: number; cache_age: number; last_updated: string }
+
+export async function checkHealth(): Promise<HealthResponse> {
   try {
     const response = await api.get('/health');
     return response.data;

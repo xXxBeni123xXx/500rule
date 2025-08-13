@@ -1,5 +1,4 @@
-import React from 'react';
-import { ParsedFocalLength } from '../types/lens';
+import type { ParsedFocalLength } from '../types/lens';
 
 type FocalLengthSliderProps = {
   parsedFocalLength: ParsedFocalLength;

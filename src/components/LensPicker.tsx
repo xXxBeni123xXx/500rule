@@ -1,5 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { Lens } from '../types/lens';
+import { useState, useMemo } from 'react';
+import type { Lens } from '../types/lens';
 import { parseFocalLength, formatFocalLength } from '../utils/focal';
 import { parseAperture } from '../utils/astro';
 
@@ -30,7 +30,7 @@ export const LensPicker: React.FC<LensPickerProps> = ({
   }, [lenses, searchTerm]);
 
   const getLensDisplayName = (lens: Lens): string => {
-    const parts = [];
+    const parts = [] as string[];
     
     if (lens.name) {
       parts.push(lens.name);

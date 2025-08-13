@@ -1,4 +1,3 @@
-import React from 'react';
 import { RuleConstant } from '../utils/astro';
 
 type RuleCalculatorProps = {
