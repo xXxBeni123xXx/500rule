@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { LensApiResponse, Lens } from '../types/lens';
 import { Camera } from '../types/camera';
+import { logger } from '../utils/logger';
 
 const api = axios.create({
   baseURL: 'https://camera-database.p.rapidapi.com',
@@ -61,7 +62,7 @@ export async function fetchLenses(params: FetchLensesParams = {}): Promise<LensA
 
     return response.data;
   } catch (error) {
-    console.warn('API unavailable, using fallback lens data:', error);
+    logger.warn('API unavailable, using fallback lens data:', error);
     
     // Filter fallback data by brand if specified
     let filteredLenses = FALLBACK_LENSES;
@@ -98,7 +99,7 @@ export async function fetchCameras(params: { brand?: string; page?: number; page
     return response.data;
   } catch (error) {
     // If cameras endpoint doesn't exist, return null
-    console.warn('Cameras endpoint not available, falling back to manual format selection');
+    logger.warn('Cameras endpoint not available, falling back to manual format selection');
     return null;
   }
 }

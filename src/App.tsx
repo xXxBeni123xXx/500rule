@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera as CameraIcon, Circle as Lens, Calculator, Star, ChevronRight, Info, Zap, Search, X, HelpCircle } from 'lucide-react';
 import { Camera, Lens as LensType, fetchCameras, fetchCompatibleLenses } from './services/api';

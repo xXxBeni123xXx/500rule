@@ -3,7 +3,6 @@ module.exports = {
   env: { browser: true, es2020: true },
   extends: [
     'eslint:recommended',
-    '@typescript-eslint/recommended',
     'plugin:react-hooks/recommended',
   ],
   ignorePatterns: ['dist', '.eslintrc.cjs'],
@@ -14,5 +13,17 @@ module.exports = {
       'warn',
       { allowConstantExport: true },
     ],
+    'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    'no-console': 'warn',
+    'prefer-const': 'error',
+    'no-var': 'error',
   },
+  overrides: [
+    {
+      files: ['src/utils/logger.ts'],
+      rules: {
+        'no-console': 'off',
+      },
+    },
+  ],
 } 

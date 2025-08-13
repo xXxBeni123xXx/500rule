@@ -3,12 +3,12 @@ import { RuleConstant } from '../utils/astro';
 
 type RuleCalculatorProps = {
   ruleConstant: RuleConstant;
-  onRuleConstantChange: (constant: RuleConstant) => void;
+  onRuleChange: (_constant: RuleConstant) => void;
 };
 
 export const RuleCalculator: React.FC<RuleCalculatorProps> = ({
   ruleConstant,
-  onRuleConstantChange
+  onRuleChange
 }) => {
   return (
     <div className="space-y-3">
@@ -18,7 +18,7 @@ export const RuleCalculator: React.FC<RuleCalculatorProps> = ({
       
       <div className="flex space-x-4">
         <button
-          onClick={() => onRuleConstantChange(500)}
+          onClick={() => onRuleChange(500)}
           className={`px-4 py-2 rounded-lg border transition-colors ${
             ruleConstant === 500
               ? 'bg-blue-600 text-white border-blue-600'
@@ -29,7 +29,7 @@ export const RuleCalculator: React.FC<RuleCalculatorProps> = ({
         </button>
         
         <button
-          onClick={() => onRuleConstantChange(400)}
+          onClick={() => onRuleChange(400)}
           className={`px-4 py-2 rounded-lg border transition-colors ${
             ruleConstant === 400
               ? 'bg-blue-600 text-white border-blue-600'

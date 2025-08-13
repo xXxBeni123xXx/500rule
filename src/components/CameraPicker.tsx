@@ -6,9 +6,9 @@ type CameraPickerProps = {
   selectedCamera: Camera | null;
   selectedFormat: string;
   customCropFactor: number | null;
-  onCameraChange: (camera: Camera | null) => void;
-  onFormatChange: (format: string) => void;
-  onCustomCropFactorChange: (cropFactor: number | null) => void;
+  onCameraChange: (_camera: Camera | null) => void;
+  onFormatChange: (_format: string) => void;
+  onCustomCropFactorChange: (_cropFactor: number | null) => void;
   loading?: boolean;
 };
 

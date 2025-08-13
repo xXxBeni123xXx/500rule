@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { logger } from '../utils/logger';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
 
@@ -58,7 +59,7 @@ export async function fetchCameras(brand?: string): Promise<Camera[]> {
     }
     throw new Error(response.data.error || 'Failed to fetch cameras');
   } catch (error) {
-    console.error('Error fetching cameras:', error);
+    logger.error('Error fetching cameras:', error);
     throw error;
   }
 }
@@ -75,7 +76,7 @@ export async function fetchCompatibleLenses(cameraId: string): Promise<Lens[]> {
     }
     throw new Error(response.data.error || 'Failed to fetch lenses');
   } catch (error) {
-    console.error('Error fetching lenses:', error);
+    logger.error('Error fetching lenses:', error);
     throw error;
   }
 }
@@ -90,7 +91,7 @@ export async function getCompatibilityInfo(cameraId: string): Promise<Compatibil
     }
     throw new Error(response.data.error || 'Failed to fetch compatibility info');
   } catch (error) {
-    console.error('Error fetching compatibility:', error);
+    logger.error('Error fetching compatibility:', error);
     throw error;
   }
 }
@@ -105,7 +106,7 @@ export async function fetchBrands(): Promise<{ cameras: string[]; lenses: string
     }
     throw new Error(response.data.error || 'Failed to fetch brands');
   } catch (error) {
-    console.error('Error fetching brands:', error);
+    logger.error('Error fetching brands:', error);
     throw error;
   }
 }
@@ -116,7 +117,7 @@ export async function checkHealth(): Promise<any> {
     const response = await api.get('/health');
     return response.data;
   } catch (error) {
-    console.error('Health check failed:', error);
+    logger.error('Health check failed:', error);
     throw error;
   }
 } 

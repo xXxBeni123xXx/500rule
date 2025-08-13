@@ -1,88 +1,53 @@
 import React from 'react';
-import { ParsedFocalLength } from '../types/lens';
 
 type FocalLengthSliderProps = {
-  parsedFocalLength: ParsedFocalLength;
+  lens: { focal_length?: string } | null;
   currentFocalLength: number;
-  onFocalLengthChange: (focalLength: number) => void;
-  manualFocalLength: number | null;
-  onManualFocalLengthChange: (focalLength: number | null) => void;
+  onManualOverride: (_focalLength: number | null) => void;
 };
 
 export const FocalLengthSlider: React.FC<FocalLengthSliderProps> = ({
-  parsedFocalLength,
+  lens,
   currentFocalLength,
-  onFocalLengthChange,
-  manualFocalLength,
-  onManualFocalLengthChange
+  onManualOverride
 }) => {
-  const handleManualChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    onManualFocalLengthChange(isNaN(value) ? null : value);
-  };
-
-  // If it's a prime lens, just show the focal length
-  if (parsedFocalLength.type === 'prime') {
-    return (
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Focal Length
-        </label>
-        <div className="p-3 bg-gray-50 rounded-lg">
-          <p className="text-sm text-gray-600">
-            Prime lens: {parsedFocalLength.min}mm
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // For zoom lenses, show slider and manual input
-  const min = parsedFocalLength.min;
-  const max = parsedFocalLength.max!;
-
+  // Simple implementation for now - just show current focal length
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Focal Length (Zoom Range: {min}mm - {max}mm)
+          Focal Length
         </label>
-        
-        <div className="space-y-3">
-          <input
-            type="range"
-            min={min}
-            max={max}
-            step="1"
-            value={currentFocalLength}
-            onChange={(e) => onFocalLengthChange(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-          />
-          
-          <div className="flex justify-between text-xs text-gray-500">
-            <span>{min}mm</span>
-            <span className="font-medium">{currentFocalLength}mm</span>
-            <span>{max}mm</span>
-          </div>
+        <div className="flex items-center space-x-2">
+          <span className="text-lg font-semibold text-gray-900">
+            {currentFocalLength}mm
+          </span>
+          {lens?.focal_length && lens.focal_length.includes('-') && (
+            <span className="text-sm text-gray-500">
+              (Range: {lens.focal_length}mm)
+            </span>
+          )}
         </div>
       </div>
-
+      
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
-          Manual Focal Length Override
+          Manual Override (Optional)
         </label>
         <input
           type="number"
           min="1"
           max="2000"
-          step="0.1"
-          value={manualFocalLength || ''}
-          onChange={handleManualChange}
+          step="1"
           className="input-field"
-          placeholder="Enter custom focal length..."
+          placeholder="Enter focal length..."
+          onChange={(e) => {
+            const value = parseFloat(e.target.value);
+            onManualOverride(isNaN(value) ? null : value);
+          }}
         />
         <p className="text-xs text-gray-500">
-          Override the lens focal length for manual lenses or unlisted focal lengths
+          Override the lens focal length for custom calculations
         </p>
       </div>
     </div>

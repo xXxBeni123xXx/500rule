@@ -4,9 +4,11 @@ import { parseFocalLength, formatFocalLength } from '../utils/focal';
 import { parseAperture } from '../utils/astro';
 
 type LensPickerProps = {
-  lenses: Lens[];
-  selectedLens: Lens | null;
-  onLensChange: (lens: Lens | null) => void;
+  lenses: any[] | null;
+  selectedLens: any | null;
+  onLensChange: (_lens: any | null) => void;
+  searchTerm: string;
+  onSearchChange: (_term: string) => void;
   loading?: boolean;
 };
 
@@ -19,13 +21,14 @@ export const LensPicker: React.FC<LensPickerProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredLenses = useMemo(() => {
-    if (!searchTerm) return lenses;
+    if (!lenses || !Array.isArray(lenses)) return [];
     
-    const term = searchTerm.toLowerCase();
+    if (!searchTerm.trim()) return lenses;
+    
     return lenses.filter(lens => 
-      lens.name?.toLowerCase().includes(term) ||
-      lens.focal_length?.toLowerCase().includes(term) ||
-      lens.maximum_aperture?.toLowerCase().includes(term)
+      lens.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lens.focal_length?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      lens.maximum_aperture?.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [lenses, searchTerm]);
 
@@ -75,7 +78,7 @@ export const LensPicker: React.FC<LensPickerProps> = ({
         <select
           value={selectedLens?.id || ''}
           onChange={(e) => {
-            const lens = lenses.find(l => l.id.toString() === e.target.value) || null;
+            const lens = lenses?.find(l => l.id.toString() === e.target.value) || null;
             onLensChange(lens);
           }}
           className="select-field"
@@ -83,7 +86,7 @@ export const LensPicker: React.FC<LensPickerProps> = ({
           size={8}
         >
           <option value="">Choose a lens...</option>
-          {filteredLenses.map((lens) => (
+          {filteredLenses?.map((lens) => (
             <option key={lens.id} value={lens.id}>
               {getLensDisplayName(lens)}
             </option>
@@ -94,7 +97,7 @@ export const LensPicker: React.FC<LensPickerProps> = ({
           <p className="text-sm text-gray-500">Loading lenses...</p>
         )}
         
-        {!loading && filteredLenses.length === 0 && lenses.length > 0 && (
+        {!loading && filteredLenses.length === 0 && (lenses?.length || 0) > 0 && (
           <p className="text-sm text-gray-500">No lenses match your search.</p>
         )}
       </div>

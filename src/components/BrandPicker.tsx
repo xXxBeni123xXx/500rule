@@ -3,7 +3,7 @@ import React from 'react';
 type BrandPickerProps = {
   brands: string[];
   selectedBrand: string;
-  onBrandChange: (brand: string) => void;
+  onBrandChange: (_brand: string) => void;
   loading?: boolean;
 };
 
