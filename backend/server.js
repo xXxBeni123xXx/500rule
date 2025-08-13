@@ -9,7 +9,10 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Environment variables
-const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '484e50973amsh5233777f12a5b90p164f19jsn3edff15294e5';
+const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
+if (!RAPIDAPI_KEY) {
+  console.warn('RAPIDAPI_KEY not set. Backend will use local fallback data.');
+}
 
 // Middleware
 app.use(cors());
@@ -80,6 +83,13 @@ async function initializeCache() {
 // Update cache from RapidAPI
 async function updateCacheFromAPI() {
   try {
+    if (!RAPIDAPI_KEY) {
+      // Use local databases when API key is not configured
+      cameraCache = CAMERA_DATABASE;
+      lensCache = LENS_DATABASE;
+      lastCacheUpdate = Date.now();
+      return;
+    }
     // Try to fetch cameras and lenses from API
     const [camerasResponse, lensesResponse] = await Promise.allSettled([
       rapidApi.get('/cameras', { params: { page_size: 100 } }),
@@ -87,7 +97,7 @@ async function updateCacheFromAPI() {
     ]);
 
     // Process cameras
-    if (camerasResponse.status === 'fulfilled' && camerasResponse.value?.data?.items) {
+    if (RAPIDAPI_KEY && camerasResponse.status === 'fulfilled' && camerasResponse.value?.data?.items) {
       const apiCameras = camerasResponse.value.data.items.map(camera => ({
         id: camera.id || `${camera.brand}-${camera.name}`.toLowerCase().replace(/\s+/g, '-'),
         brand: camera.brand,
@@ -113,7 +123,7 @@ async function updateCacheFromAPI() {
     }
 
     // Process lenses
-    if (lensesResponse.status === 'fulfilled' && lensesResponse.value?.data?.items) {
+    if (RAPIDAPI_KEY && lensesResponse.status === 'fulfilled' && lensesResponse.value?.data?.items) {
       const apiLenses = lensesResponse.value.data.items.map(lens => ({
         id: lens.id || `${lens.brand}-${lens.name}`.toLowerCase().replace(/\s+/g, '-'),
         brand: lens.brand,
@@ -170,11 +180,18 @@ app.get('/api/cameras', async (req, res) => {
         console.warn('API refresh failed, using cached data');
       }
     }
+
+    const { brand } = req.query;
+    let data = cameraCache;
+    if (brand) {
+      const brandLower = String(brand).toLowerCase();
+      data = cameraCache.filter(c => c.brand && c.brand.toLowerCase() === brandLower);
+    }
     
     res.json({
       success: true,
-      data: cameraCache,
-      count: cameraCache.length,
+      data,
+      count: data.length,
       cached_at: new Date(lastCacheUpdate).toISOString()
     });
   } catch (error) {
@@ -216,11 +233,13 @@ app.get('/api/lenses', async (req, res) => {
 // Get camera brands
 app.get('/api/brands', (req, res) => {
   try {
-    const brands = [...new Set(cameraCache.map(camera => camera.brand))].sort();
+    const cameraBrands = [...new Set(cameraCache.map(camera => camera.brand))].filter(Boolean).sort();
+    const lensBrands = [...new Set(lensCache.map(lens => lens.brand))].filter(Boolean).sort();
+    const all = [...new Set([...cameraBrands, ...lensBrands])].sort();
     res.json({
       success: true,
-      data: brands,
-      count: brands.length
+      data: { cameras: cameraBrands, lenses: lensBrands, all },
+      count: all.length
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -246,6 +265,7 @@ app.get('/api/compatibility/:cameraId', (req, res) => {
       success: true,
       camera: camera,
       compatible_lenses: compatibleLenses,
+      count: compatibleLenses.length,
       mount_info: {
         mount: camera.mount,
         compatible_mounts: MOUNT_COMPATIBILITY[camera.mount] || []

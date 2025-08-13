@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -25,8 +25,8 @@ export interface Lens {
   mount: string;
   focal_length: string;
   max_aperture: string;
-  type: 'prime' | 'zoom';
-  category: 'wide-angle' | 'standard' | 'telephoto' | 'portrait';
+  type: 'prime' | 'zoom' | 'adapter';
+  category: 'wide-angle' | 'standard' | 'telephoto' | 'portrait' | 'macro' | 'adapter';
   is_stabilized?: boolean;
   weight?: number;
 }
@@ -51,7 +51,7 @@ export interface CompatibilityResponse {
 export async function fetchCameras(brand?: string): Promise<Camera[]> {
   try {
     const params = brand ? { brand } : {};
-    const response = await api.get<ApiResponse<Camera[]>>('/cameras', { params });
+    const response = await api.get<ApiResponse<Camera[]>>('cameras', { params });
     
     if (response.data.success) {
       return response.data.data;
@@ -66,7 +66,7 @@ export async function fetchCameras(brand?: string): Promise<Camera[]> {
 // Fetch compatible lenses for a specific camera
 export async function fetchCompatibleLenses(cameraId: string): Promise<Lens[]> {
   try {
-    const response = await api.get<ApiResponse<Lens[]>>('/lenses', {
+    const response = await api.get<ApiResponse<Lens[]>>('lenses', {
       params: { camera_id: cameraId }
     });
     
@@ -83,7 +83,7 @@ export async function fetchCompatibleLenses(cameraId: string): Promise<Lens[]> {
 // Get detailed compatibility information
 export async function getCompatibilityInfo(cameraId: string): Promise<CompatibilityResponse> {
   try {
-    const response = await api.get<CompatibilityResponse>(`/compatibility/${cameraId}`);
+    const response = await api.get<CompatibilityResponse>(`compatibility/${cameraId}`);
     
     if (response.data.success) {
       return response.data;
@@ -98,7 +98,7 @@ export async function getCompatibilityInfo(cameraId: string): Promise<Compatibil
 // Fetch available brands
 export async function fetchBrands(): Promise<{ cameras: string[]; lenses: string[]; all: string[] }> {
   try {
-    const response = await api.get<ApiResponse<{ cameras: string[]; lenses: string[]; all: string[] }>>('/brands');
+    const response = await api.get<ApiResponse<{ cameras: string[]; lenses: string[]; all: string[] }>>('brands');
     
     if (response.data.success) {
       return response.data.data;
@@ -111,9 +111,9 @@ export async function fetchBrands(): Promise<{ cameras: string[]; lenses: string
 }
 
 // Health check
-export async function checkHealth(): Promise<any> {
+export async function checkHealth(): Promise<{ status: string; cameras: number; lenses: number; cache_age: number; last_updated: string; }> {
   try {
-    const response = await api.get('/health');
+    const response = await api.get('health');
     return response.data;
   } catch (error) {
     console.error('Health check failed:', error);

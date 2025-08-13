@@ -70,6 +70,8 @@ A professional, full-stack web application for calculating optimal exposure time
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3001
 
+Note: The frontend dev server proxies `/api` requests to the backend to avoid CORS during development.
+
 ## 🏗️ Architecture
 
 ### Frontend (React + TypeScript)
@@ -118,8 +120,9 @@ Returns server status and database counts.
 #### Camera Operations
 ```http
 GET /api/cameras
+GET /api/cameras?brand=Canon
 ```
-Get all available cameras.
+Get all available cameras, optionally filtered by brand.
 
 #### Lens Operations
 ```http
@@ -139,7 +142,7 @@ Get detailed compatibility information for a specific camera.
 ```http
 GET /api/brands
 ```
-Get list of all available camera brands.
+Get unique brands for cameras and lenses. Returns `{ cameras, lenses, all }`.
 
 ### Response Format
 ```json
@@ -210,9 +213,9 @@ Max Shutter Speed (seconds) = Rule Constant ÷ (Focal Length × Crop Factor)
 
 ### Available Scripts
 ```bash
-npm run dev          # Start both frontend and backend
+npm run dev          # Start both frontend and backend (backend with nodemon)
 npm run dev:frontend # Frontend only (Vite)
-npm run dev:backend  # Backend only (Node.js)
+npm run dev:backend  # Backend only (Nodemon)
 npm run build        # Production build
 npm run preview      # Preview production build
 npm run lint         # ESLint checking
@@ -237,7 +240,7 @@ npm run lint         # ESLint checking
 2. **Create feature branch**: `git checkout -b feature/amazing-feature`
 3. **Commit changes**: `git commit -m 'Add amazing feature'`
 4. **Push to branch**: `git push origin feature/amazing-feature`
-5. **Open pull request**
+5. **Open pull request`
 
 ### Equipment Contributions Welcome!
 - Missing camera models

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:frontend": "vite",
-    "dev:backend": "node backend/server.js",
+    "dev:backend": "nodemon --watch backend backend/server.js",
+    "start": "node backend/server.js",
     "build": "tsc && vite build",
     "build:backend": "node backend/server.js",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

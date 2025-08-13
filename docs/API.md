@@ -50,7 +50,7 @@ Returns server status and database information.
 ```
 
 **Fields:**
-- `status`: Server status (`"ok"`)
+- `status`: Server status ("ok")
 - `cameras`: Number of cameras in database
 - `lenses`: Number of lenses in database  
 - `cache_age`: Minutes since last cache update
@@ -62,6 +62,9 @@ Returns server status and database information.
 
 #### `GET /api/cameras`
 Retrieves all available cameras with full specifications.
+
+**Query Parameters:**
+- `brand` (string): Filter cameras by brand (e.g., `brand=Canon`)
 
 **Response:**
 ```json
@@ -95,8 +98,8 @@ Retrieves all available cameras with full specifications.
 - `price_range`: Target market segment (string)
 
 **Possible Values:**
-- `sensor_format`: `"Full Frame"`, `"APS-C"`, `"Micro Four Thirds"`, `"Medium Format"`
-- `price_range`: `"Entry"`, `"Enthusiast"`, `"Professional"`
+- `sensor_format`: "Full Frame", "APS-C", "Micro Four Thirds", "Medium Format"
+- `price_range`: "Entry", "Enthusiast", "Professional"
 - `mount`: See [Mount Types](#mount-types) section
 
 ---
@@ -155,31 +158,26 @@ GET /api/lenses?mount=Sony%20E
 - `weight`: Weight in grams (number)
 
 **Possible Values:**
-- `type`: `"prime"`, `"zoom"`, `"adapter"`
-- `category`: `"wide-angle"`, `"standard"`, `"telephoto"`, `"portrait"`, `"macro"`, `"adapter"`
+- `type`: "prime", "zoom", "adapter"
+- `category`: "wide-angle", "standard", "telephoto", "portrait", "macro", "adapter"
 
 ---
 
-### Camera Brands
+### Brands
 
 #### `GET /api/brands`
-Returns list of all available camera brands.
+Returns unique brands for cameras and lenses.
 
 **Response:**
 ```json
 {
   "success": true,
-  "data": [
-    "Canon",
-    "Fujifilm", 
-    "Leica",
-    "Nikon",
-    "Olympus",
-    "Panasonic",
-    "Pentax",
-    "Sony"
-  ],
-  "count": 8
+  "data": {
+    "cameras": ["Canon", "Fujifilm", "Leica", "Nikon", "Olympus", "Panasonic", "Pentax", "Sony"],
+    "lenses": ["Canon", "Fujifilm", "Leica", "Nikon", "Panasonic", "Sigma", "Sony", "Tamron", "Tokina", "Viltrox", "Zeiss", "Rokinon", "Samyang", "Laowa"],
+    "all": ["Canon", "Fujifilm", "Laowa", "Leica", "Nikon", "Olympus", "Panasonic", "Pentax", "Rokinon", "Samyang", "Sigma", "Sony", "Tamron", "Tokina", "Viltrox", "Zeiss"]
+  },
+  "count": 16
 }
 ```
 
@@ -226,6 +224,7 @@ GET /api/compatibility/sony-a7-iv
       "weight": 886
     }
   ],
+  "count": 1,
   "mount_info": {
     "mount": "Sony E",
     "compatible_mounts": ["Sony E", "Sony FE"]

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera as CameraIcon, Circle as Lens, Calculator, Star, ChevronRight, Info, Zap, Search, X, HelpCircle } from 'lucide-react';
 import { Camera, Lens as LensType, fetchCameras, fetchCompatibleLenses } from './services/api';
@@ -39,6 +39,14 @@ function App() {
   useEffect(() => {
     loadCameras();
   }, []);
+
+  // Memoized stars to avoid re-randomizing on each render
+  const stars = useMemo(() => Array.from({ length: 50 }, () => ({
+    left: Math.random() * 100,
+    top: Math.random() * 100,
+    duration: 2 + Math.random() * 2,
+    delay: Math.random() * 2,
+  })), []);
 
   // Load compatible lenses when camera changes
   useEffect(() => {
@@ -87,7 +95,7 @@ function App() {
   };
 
   // Advanced search function for cameras
-  const filteredCameras = allCameras.filter(camera => {
+  const filteredCameras = useMemo(() => allCameras.filter(camera => {
     if (!cameraSearchTerm) return true;
     const searchLower = cameraSearchTerm.toLowerCase().trim();
     
@@ -118,10 +126,10 @@ function App() {
     });
     
     return allWordsFound || modelNumberMatches;
-  });
+  }), [allCameras, cameraSearchTerm]);
 
   // Advanced search function for lenses
-  const filteredLenses = allCompatibleLenses.filter(lens => {
+  const filteredLenses = useMemo(() => allCompatibleLenses.filter(lens => {
     if (!lensSearchTerm) return true;
     const searchLower = lensSearchTerm.toLowerCase().trim();
     
@@ -169,7 +177,7 @@ function App() {
     });
     
     return allWordsFound || focalLengthMatches || apertureMatches;
-  });
+  }), [allCompatibleLenses, lensSearchTerm]);
 
   // Calculate results
   const effectiveFocalLength = manualFocalLength || (selectedLens ? 
@@ -187,23 +195,13 @@ function App() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Animated background stars */}
       <div className="absolute inset-0 overflow-hidden">
-        {[...Array(50)].map((_, i) => (
+        {stars.map((star, i) => (
           <motion.div
             key={i}
             className="absolute w-1 h-1 bg-white rounded-full opacity-70"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              opacity: [0.3, 1, 0.3],
-              scale: [1, 1.2, 1],
-            }}
-            transition={{
-              duration: 2 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
+            style={{ left: `${star.left}%`, top: `${star.top}%` }}
+            animate={{ opacity: [0.3, 1, 0.3], scale: [1, 1.2, 1] }}
+            transition={{ duration: star.duration, repeat: Infinity, delay: star.delay }}
           />
         ))}
       </div>
