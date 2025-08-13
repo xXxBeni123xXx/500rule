@@ -32,13 +32,14 @@ export function calculateEffectiveFocalLength(focalLength: number, cropFactor: n
 }
 
 /**
- * Format shutter speed as a fraction
- * For speeds >= 1s, show as "1/X s"
+ * Format shutter speed for display
+ * For speeds >= 1s, show as seconds (rounded to 0.1s)
  * For speeds < 1s, show as nearest common camera fraction
  */
 export function formatShutterFraction(seconds: number): string {
   if (seconds >= 1) {
-    return `1/${(1 / seconds).toFixed(1)} s`;
+    const rounded = Math.round(seconds * 10) / 10;
+    return `${rounded} s`;
   }
 
   // Common camera shutter speeds (fractions of a second)

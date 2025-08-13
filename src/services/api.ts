@@ -25,8 +25,8 @@ export interface Lens {
   mount: string;
   focal_length: string;
   max_aperture: string;
-  type: 'prime' | 'zoom';
-  category: 'wide-angle' | 'standard' | 'telephoto' | 'portrait';
+  type?: 'prime' | 'zoom' | string;
+  category?: 'wide-angle' | 'standard' | 'telephoto' | 'portrait' | string;
   is_stabilized?: boolean;
   weight?: number;
 }
@@ -45,6 +45,14 @@ export interface CompatibilityResponse {
   compatible_lenses: Lens[];
   count: number;
   error?: string;
+}
+
+export interface HealthResponse {
+  status: string;
+  cameras: number;
+  lenses: number;
+  cache_age: number;
+  last_updated: string;
 }
 
 // Fetch all cameras or filter by brand
@@ -111,9 +119,9 @@ export async function fetchBrands(): Promise<{ cameras: string[]; lenses: string
 }
 
 // Health check
-export async function checkHealth(): Promise<any> {
+export async function checkHealth(): Promise<HealthResponse> {
   try {
-    const response = await api.get('/health');
+    const response = await api.get<HealthResponse>('/health');
     return response.data;
   } catch (error) {
     console.error('Health check failed:', error);
