@@ -36,6 +36,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
     unsplash: false,
     openai: false
   });
+  const [apiSource, setApiSource] = useState<Record<string, 'backend' | 'user' | 'none'>>({});
   const [saved, setSaved] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [autoLocation, setAutoLocation] = useState(true);
@@ -82,6 +83,14 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
           unsplash: !!data.unsplash || !!apiKeys.unsplash,
           openai: !!data.openai || !!apiKeys.openai,
         });
+        setApiSource({
+          openWeather: data.openweather ? 'backend' : apiKeys.openWeather ? 'user' : 'none',
+          googleMaps: data.googleMaps ? 'backend' : apiKeys.googleMaps ? 'user' : 'none',
+          rapidApi: data.rapidapi ? 'backend' : apiKeys.rapidApi ? 'user' : 'none',
+          flickr: data.flickr ? 'backend' : apiKeys.flickr ? 'user' : 'none',
+          unsplash: data.unsplash ? 'backend' : apiKeys.unsplash ? 'user' : 'none',
+          openai: data.openai ? 'backend' : apiKeys.openai ? 'user' : 'none',
+        });
         return;
       }
     } catch (e) {
@@ -96,6 +105,14 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
       openai: !!import.meta.env.VITE_OPENAI_ENABLED || !!apiKeys.openai
     };
     setApiStatus(status);
+    setApiSource({
+      openWeather: status.openWeather ? (import.meta.env.VITE_OPENWEATHER_API_KEY ? 'backend' : 'user') : 'none',
+      googleMaps: status.googleMaps ? (import.meta.env.VITE_GOOGLE_MAPS_API_KEY ? 'backend' : 'user') : 'none',
+      rapidApi: status.rapidApi ? (import.meta.env.VITE_RAPIDAPI_KEY ? 'backend' : 'user') : 'none',
+      flickr: status.flickr ? (import.meta.env.VITE_FLICKR_API_KEY ? 'backend' : 'user') : 'none',
+      unsplash: status.unsplash ? (import.meta.env.VITE_UNSPLASH_ACCESS_KEY ? 'backend' : 'user') : 'none',
+      openai: status.openai ? (import.meta.env.VITE_OPENAI_ENABLED ? 'backend' : 'user') : 'none',
+    });
   };
 
   const handleSaveApiKeys = () => {
@@ -179,7 +196,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                         <AlertCircle className="h-4 w-4 text-yellow-400" />
                       )}
                       <span className="text-xs text-slate-400">
-                        {apiStatus.openWeather ? 'Configured' : 'Not configured'}
+                        {apiStatus.openWeather ? (apiSource.openWeather === 'backend' ? 'using backend apikey' : 'using user apikey') : 'no apikey'}
                       </span>
                     </div>
                   </div>
@@ -211,7 +228,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                         <AlertCircle className="h-4 w-4 text-yellow-400" />
                       )}
                       <span className="text-xs text-slate-400">
-                        {apiStatus.googleMaps ? 'Configured' : 'Not configured'}
+                        {apiStatus.googleMaps ? (apiSource.googleMaps === 'backend' ? 'using backend apikey' : 'using user apikey') : 'no apikey'}
                       </span>
                     </div>
                   </div>
@@ -243,7 +260,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                         <AlertCircle className="h-4 w-4 text-yellow-400" />
                       )}
                       <span className="text-xs text-slate-400">
-                        {apiStatus.rapidApi ? 'Configured' : 'Not configured'}
+                        {apiStatus.rapidApi ? (apiSource.rapidApi === 'backend' ? 'using backend apikey' : 'using user apikey') : 'no apikey'}
                       </span>
                     </div>
                   </div>
@@ -275,7 +292,7 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                         <AlertCircle className="h-4 w-4 text-yellow-400" />
                       )}
                       <span className="text-xs text-slate-400">
-                        {apiStatus.openai ? 'Configured' : 'Not configured'}
+                        {apiStatus.openai ? (apiSource.openai === 'backend' ? 'using backend apikey' : 'using user apikey') : 'no apikey'}
                       </span>
                     </div>
                   </div>

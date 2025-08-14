@@ -121,7 +121,7 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
       distance: calculateDistance(userLocation, loc)
     })).sort((a, b) => a.distance - b.distance);
 
-    setNearbyLocations(locationsWithDistance.slice(0, 5));
+    setNearbyLocations(locationsWithDistance.slice(0, 12));
 
     // Add dark sky location markers
     locationsWithDistance.forEach(location => {
@@ -165,7 +165,7 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
       addLightPollutionOverlay();
     }
 
-  }, [userLocation, showLightPollution]);
+  }, [userLocation.lat, userLocation.lng, showLightPollution]);
 
   // Add light pollution heatmap overlay
   const addLightPollutionOverlay = () => {
@@ -173,6 +173,12 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
 
     // Generate simulated light pollution data points
     const heatmapData = generateLightPollutionData(userLocation);
+
+    // Clear previous heatmap if any
+    if (heatmapRef.current) {
+      heatmapRef.current.setMap(null);
+      heatmapRef.current = null;
+    }
 
     heatmapRef.current = new google.maps.visualization.HeatmapLayer({
       data: heatmapData,

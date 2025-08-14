@@ -117,7 +117,16 @@ function App() {
   };
 
   // Advanced search function for cameras
-  const filteredCameras = allCameras.filter(camera => {
+  // De-duplicate cameras by id
+  const uniqueCameraMap = new Map<string, Camera>();
+  allCameras.forEach((cam) => {
+    if (!uniqueCameraMap.has(cam.id)) {
+      uniqueCameraMap.set(cam.id, cam);
+    }
+  });
+  const uniqueCameras = Array.from(uniqueCameraMap.values());
+
+  const filteredCameras = uniqueCameras.filter(camera => {
     if (!cameraSearchTerm) return true;
     const searchLower = cameraSearchTerm.toLowerCase().trim();
     
@@ -151,7 +160,16 @@ function App() {
   });
 
   // Advanced search function for lenses
-  const filteredLenses = allCompatibleLenses.filter(lens => {
+  // De-duplicate lenses by id
+  const uniqueLensMap = new Map<string, LensType>();
+  allCompatibleLenses.forEach((ln) => {
+    if (!uniqueLensMap.has(ln.id)) {
+      uniqueLensMap.set(ln.id, ln);
+    }
+  });
+  const uniqueLenses = Array.from(uniqueLensMap.values());
+
+  const filteredLenses = uniqueLenses.filter(lens => {
     if (!lensSearchTerm) return true;
     const searchLower = lensSearchTerm.toLowerCase().trim();
     

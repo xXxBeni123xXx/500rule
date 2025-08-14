@@ -86,6 +86,11 @@ export function SmartTips({
 
     // Camera-specific tips
     if (currentCamera) {
+      const cameraName = typeof currentCamera === 'string'
+        ? currentCamera
+        : `${currentCamera?.brand ?? ''} ${currentCamera?.name ?? ''}`.trim();
+      const cameraLower = cameraName.toLowerCase();
+
       if (cropFactor && cropFactor > 1.5) {
         newTips.push({
           type: 'info',
@@ -95,7 +100,7 @@ export function SmartTips({
         });
       }
       
-      if (currentCamera.toLowerCase().includes('sony') || currentCamera.toLowerCase().includes('nikon')) {
+      if (cameraLower.includes('sony') || cameraLower.includes('nikon')) {
         newTips.push({
           type: 'tip',
           title: 'Star Eater Algorithm',
@@ -132,7 +137,11 @@ export function SmartTips({
 
       // Aperture tips
       if (currentLens) {
-        if (currentLens.includes('1.4') || currentLens.includes('1.8')) {
+        const lensName = typeof currentLens === 'string'
+          ? currentLens
+          : `${currentLens?.brand ?? ''} ${currentLens?.name ?? ''}`.trim();
+        const lensLower = lensName.toLowerCase();
+        if (lensLower.includes('1.4') || lensLower.includes('1.8')) {
           newTips.push({
             type: 'tip',
             title: 'Fast Aperture Advantage',
@@ -141,7 +150,7 @@ export function SmartTips({
           });
         }
         
-        if (currentLens.toLowerCase().includes('zoom')) {
+        if (lensLower.includes('zoom')) {
           newTips.push({
             type: 'info',
             title: 'Zoom Lens Tip',

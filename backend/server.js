@@ -144,15 +144,13 @@ async function updateCacheFromAPI() {
         price_range: camera.price_range || 'Unknown'
       }));
       
-      // Merge with enhanced database, preferring API data but keeping enhanced data for missing items
-      const combinedCameras = [...apiCameras];
-      CAMERA_DATABASE.forEach(enhancedCamera => {
-        if (!combinedCameras.find(cam => cam.id === enhancedCamera.id)) {
-          combinedCameras.push(enhancedCamera);
-        }
-      });
-      
-      cameraCache = combinedCameras;
+      // Merge with enhanced database and de-duplicate
+      const combinedCams = [...apiCameras, ...CAMERA_DATABASE];
+      const camMap = new Map();
+      for (const c of combinedCams) {
+        if (!camMap.has(c.id)) camMap.set(c.id, c);
+      }
+      cameraCache = Array.from(camMap.values());
     } else {
       throw new Error('Camera API unavailable');
     }
@@ -172,15 +170,13 @@ async function updateCacheFromAPI() {
         weight: lens.weight || 500
       }));
       
-      // Merge with enhanced database
-      const combinedLenses = [...apiLenses];
-      LENS_DATABASE.forEach(enhancedLens => {
-        if (!combinedLenses.find(lens => lens.id === enhancedLens.id)) {
-          combinedLenses.push(enhancedLens);
-        }
-      });
-      
-      lensCache = combinedLenses;
+      // Merge with enhanced database and de-duplicate
+      const combined = [...apiLenses, ...LENS_DATABASE];
+      const lensMap = new Map();
+      for (const l of combined) {
+        if (!lensMap.has(l.id)) lensMap.set(l.id, l);
+      }
+      lensCache = Array.from(lensMap.values());
     } else {
       throw new Error('Lens API unavailable');
     }
