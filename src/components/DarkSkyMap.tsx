@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Star, MapPin, Navigation2, Info, Layers } from 'lucide-react';
+import axios from 'axios';
 
 interface DarkSkyLocation {
   lat: number;
@@ -75,6 +76,7 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
   const [selectedLocation, setSelectedLocation] = useState<DarkSkyLocation | null>(null);
   const [showLightPollution, setShowLightPollution] = useState(true);
   const [nearbyLocations, setNearbyLocations] = useState<DarkSkyLocation[]>([]);
+  const [lpValue, setLpValue] = useState<number | null>(null);
 
   useEffect(() => {
     if (!mapRef.current || !window.google?.maps) return;
@@ -165,6 +167,9 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
       addLightPollutionOverlay();
     }
 
+    // Fetch light pollution metric for current center
+    fetchLightPollution(userLocation);
+
   }, [userLocation.lat, userLocation.lng, showLightPollution]);
 
   // Add light pollution heatmap overlay
@@ -202,6 +207,20 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
       radius: 35,
       opacity: 0.35
     });
+  };
+
+  const fetchLightPollution = async (coords: { lat: number; lng: number }) => {
+    try {
+      const baseURL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await axios.get(`${baseURL}/light-pollution`, {
+        params: { lat: coords.lat, lon: coords.lng, layer: 'viirs_2021' }
+      });
+      if (res.data?.success && res.data?.data) {
+        setLpValue(res.data.data.latest ?? null);
+      }
+    } catch (e) {
+      // ignore
+    }
   };
 
   // Toggle light pollution overlay
@@ -274,6 +293,11 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
           <div className="text-slate-300">
             Heatmap shows simulated light pollution intensity. Aim for darker colors for better astrophotography.
           </div>
+          {lpValue !== null && (
+            <div className="text-slate-300">
+              Latest VIIRS radiance: <span className="font-mono text-white">{lpValue.toFixed(2)}</span>
+            </div>
+          )}
         </div>
 
         {/* Your Location Indicator */}

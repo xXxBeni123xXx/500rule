@@ -9,6 +9,7 @@ class ExternalAPIService {
     this.flickrApiKey = process.env.FLICKR_API_KEY || '';
     this.unsplashApiKey = process.env.UNSPLASH_ACCESS_KEY || '';
     this.openWeatherApiKey = process.env.OPENWEATHER_API_KEY || '';
+    this.lpmapApiKey = process.env.LPMAP_API_KEY || '';
   }
 
   /**
@@ -297,6 +298,47 @@ class ExternalAPIService {
     }));
 
     return results;
+  }
+
+  /**
+   * Fetch light pollution metrics using LightPollutionMap QueryRaster API
+   * Docs: https://www.lightpollutionmap.info/help.html
+   * Returns radiance values across years and elevation
+   */
+  async fetchLightPollution(lat, lon, layer = 'viirs_2021') {
+    try {
+      if (!this.lpmapApiKey) {
+        console.warn('LightPollutionMap API key not configured');
+        return null;
+      }
+      const url = 'https://www.lightpollutionmap.info/QueryRaster/';
+      const params = {
+        qk: this.lpmapApiKey,
+        ql: layer,
+        qt: 'point_t',
+        qd: `${lat},${lon}`
+      };
+      const response = await axios.get(url, {
+        params,
+        responseType: 'text'
+      });
+      const text = typeof response.data === 'string' ? response.data.trim() : '';
+      // Expected format: "v1;v2;...;vn,elevation"
+      let values = [];
+      let elevation = null;
+      if (text.includes(',')) {
+        const [valsStr, elevStr] = text.split(',');
+        values = valsStr.split(';').map(v => parseFloat(v)).filter(v => !isNaN(v));
+        elevation = parseFloat(elevStr);
+      } else {
+        values = text.split(';').map(v => parseFloat(v)).filter(v => !isNaN(v));
+      }
+      const latest = values.length ? values[values.length - 1] : null;
+      return { layer, values, latest, elevation };
+    } catch (error) {
+      console.error('Error fetching light pollution data:', error);
+      return null;
+    }
   }
 }
 

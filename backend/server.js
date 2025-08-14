@@ -448,6 +448,21 @@ app.get('/api/aurora-forecast', async (req, res) => {
   }
 });
 
+// Light pollution endpoint
+app.get('/api/light-pollution', async (req, res) => {
+  try {
+    const { lat, lon, layer } = req.query;
+    if (!lat || !lon) {
+      return res.status(400).json({ success: false, error: 'Latitude and longitude are required' });
+    }
+    const result = await externalAPIs.fetchLightPollution(lat, lon, layer || 'viirs_2021');
+    res.json({ success: true, data: result });
+  } catch (error) {
+    console.error('Light pollution endpoint error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch light pollution data' });
+  }
+});
+
 // Equipment suggestions endpoint
 app.get('/api/equipment-suggestions', async (req, res) => {
   try {
