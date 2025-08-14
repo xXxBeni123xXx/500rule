@@ -15,7 +15,7 @@ export function parseFocalLength(focalString?: string): ParsedFocalLength | null
     .trim();
 
   // Check for range (zoom) - handle both hyphen and en-dash
-  const rangeMatch = normalized.match(/^(\d+(?:\.\d+)?)[–\-](\d+(?:\.\d+)?)$/);
+  const rangeMatch = normalized.match(/^(\d+(?:\.\d+)?)[–-](\d+(?:\.\d+)?)$/);
   if (rangeMatch) {
     const min = parseFloat(rangeMatch[1]);
     const max = parseFloat(rangeMatch[2]);

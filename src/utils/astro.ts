@@ -1,6 +1,6 @@
 import { CAMERA_FORMATS } from '../types/camera';
 
-export type RuleConstant = 500 | 400;
+export type RuleConstant = 500 | 400 | 'NPF';
 
 /**
  * Calculate maximum shutter speed using the 500/400 rule
@@ -87,4 +87,70 @@ export function getTrailRisk(focalLength: number, cropFactor: number): 'low' | '
   if (effectiveFocalLength <= 24) return 'low';
   if (effectiveFocalLength <= 85) return 'medium';
   return 'high';
+}
+
+/**
+ * Calculate pixel pitch from sensor dimensions and megapixels
+ */
+export function calculatePixelPitch(
+  sensorWidth: number,
+  sensorHeight: number,
+  megapixels: number
+): number {
+  const totalPixels = megapixels * 1000000;
+  const aspectRatio = sensorWidth / sensorHeight;
+  const pixelsHeight = Math.sqrt(totalPixels / aspectRatio);
+  const pixelsWidth = pixelsHeight * aspectRatio;
+  
+  const pixelPitch = (sensorWidth / pixelsWidth) * 1000; // Convert to micrometers
+  
+  return Math.round(pixelPitch * 100) / 100;
+}
+
+/**
+ * Calculate maximum shutter speed using the NPF rule
+ * More accurate for modern high-resolution sensors
+ */
+export function calculateNPFRule(
+  aperture: number,
+  pixelPitch: number,
+  focalLength: number,
+  declination: number = 0
+): number | null {
+  if (!aperture || !pixelPitch || !focalLength || 
+      aperture <= 0 || pixelPitch <= 0 || focalLength <= 0) {
+    return null;
+  }
+  
+  // NPF Rule: (35 × aperture + 30 × pixel pitch) ÷ focal length
+  const npfBase = (35 * aperture + 30 * pixelPitch) / focalLength;
+  
+  // Adjust for declination (optional)
+  const declinationFactor = Math.cos(declination * Math.PI / 180);
+  
+  return npfBase * declinationFactor;
+}
+
+/**
+ * Get recommended rule based on equipment
+ */
+export function getRecommendedRule(
+  megapixels: number,
+  focalLength: number,
+  cropFactor: number
+): '500' | '400' | 'NPF' {
+  const effectiveFocalLength = calculateEffectiveFocalLength(focalLength, cropFactor);
+  
+  // NPF is recommended for high-resolution sensors and long focal lengths
+  if (megapixels > 24 && effectiveFocalLength > 50) {
+    return 'NPF';
+  }
+  
+  // 400 rule for medium focal lengths
+  if (effectiveFocalLength > 35) {
+    return '400';
+  }
+  
+  // 500 rule for wide angles
+  return '500';
 } 
