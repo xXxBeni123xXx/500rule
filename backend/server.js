@@ -2,14 +2,25 @@ import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 import { CAMERA_DATABASE } from './data/cameras.js';
 import { LENS_DATABASE } from './data/lenses.js';
 import { MOUNT_COMPATIBILITY } from './data/mountCompatibility.js';
 import externalAPIs from './services/externalAPIs.js';
 import openaiService from './services/openaiService.js';
 
-// Load environment variables
-dotenv.config();
+// Load environment variables (prefer .env.local if present)
+try {
+  const envLocalPath = path.resolve(process.cwd(), '.env.local');
+  if (fs.existsSync(envLocalPath)) {
+    dotenv.config({ path: envLocalPath });
+  } else {
+    dotenv.config();
+  }
+} catch {
+  dotenv.config();
+}
 
 const app = express();
 const PORT = process.env.PORT || 3001;

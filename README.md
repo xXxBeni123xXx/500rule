@@ -2,7 +2,7 @@
 
 A professional, full-stack web application for calculating optimal exposure times for astrophotography using multiple calculation methods including the 500-rule, NPF rule, and more. Features intelligent camera-lens compatibility matching, comprehensive equipment database, location-based weather conditions, and smart equipment suggestions.
 
-![500-Rule Calculator](https://img.shields.io/badge/Version-2.4.0-blue.svg)
+![500-Rule Calculator](https://img.shields.io/badge/Version-2.5.0-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-brightgreen.svg)
 ![React](https://img.shields.io/badge/React-18-blue.svg)
@@ -18,6 +18,7 @@ A professional, full-stack web application for calculating optimal exposure time
 - **Dual Interface**: Guided selection with equipment picker OR manual parameter input
 - **Real-time Calculations**: Instant updates as you change parameters
 - **Trail Risk Assessment**: Visual indicators for star trail probability
+ - **Light Pollution Map**: Overlays LightPollutionMap.info raster tiles plus a local heat glow to visualize sky brightness
 - **ISO Recommendations**: Smart ISO suggestions based on conditions
 
 ### 🔍 Advanced Search
@@ -112,7 +113,7 @@ A professional, full-stack web application for calculating optimal exposure time
 The app works without API keys but you'll get enhanced features with them. Here's how to set up each one:
 
 ### 1. OpenWeatherMap API (Weather Conditions)
-**Features**: Real-time weather, visibility, humidity, cloud cover
+**Features**: Real-time weather, visibility, humidity, cloud cover (fallback to Open‑Meteo if not configured)
 
 1. Go to [OpenWeatherMap](https://openweathermap.org/api)
 2. Sign up for a free account
@@ -123,7 +124,7 @@ The app works without API keys but you'll get enhanced features with them. Here'
    ```
 
 ### 2. Google Maps API (Location Features)
-**Features**: Interactive maps, place search, dark sky locations
+**Features**: Interactive maps, place search, dark sky locations, light pollution overlay
 
 1. Go to [Google Cloud Console](https://console.cloud.google.com/)
 2. Create a new project or select existing
@@ -132,7 +133,7 @@ The app works without API keys but you'll get enhanced features with them. Here'
    - Places API
    - Geocoding API
 4. Create credentials (API Key)
-5. Add to `.env.local`:
+5. Add to `.env.local` (frontend reads from this; backend also prefers .env.local if present):
    ```
    VITE_GOOGLE_MAPS_API_KEY=your_key_here
    ```

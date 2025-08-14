@@ -51,6 +51,7 @@ export function LocationPicker({ onLocationSelect, initialLocation }: LocationPi
   useEffect(() => {
     const storedKeys = localStorage.getItem('userApiKeys');
     const userKeys = storedKeys ? JSON.parse(storedKeys) : {};
+    // Prefer .env.local value injected at build, else user-provided
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || userKeys.googleMaps;
     if (!apiKey) {
       setError('Google Maps API key not configured');

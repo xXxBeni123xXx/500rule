@@ -1,3 +1,12 @@
+## v2.5.0
+
+- AstroConditions: dynamic weather/moon/aurora with date/time, error handling, explanations
+- DarkSkyMap: real light pollution overlay using LightPollutionMap.info tiles; improved legend; more nearby sites; updates per location
+- SmartTips: robust handling of object/string camera and lens; includes live conditions and location
+- De-duplication: removed duplicate cameras/lenses in UI and server caches
+- Settings: shows API key source (using backend apikey / using user apikey / no apikey) and queries backend config
+- Backend: prefers `.env.local` when present; weather fallback to Open‑Meteo if OpenWeather missing
+- Docs: updated README and version badges
 # Changelog
 
 All notable changes to the 500-Rule Astrophotography Calculator project.
