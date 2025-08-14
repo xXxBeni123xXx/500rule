@@ -4,6 +4,8 @@ import axios from 'axios';
 import { CAMERA_DATABASE } from './data/cameras.js';
 import { LENS_DATABASE } from './data/lenses.js';
 import { MOUNT_COMPATIBILITY } from './data/mountCompatibility.js';
+import weatherService from './services/weatherService.js';
+import astronomyService from './services/astronomyService.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -361,6 +363,143 @@ app.get('/api/compatibility/:cameraId', (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Weather API endpoint
+app.get('/api/weather/conditions', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    
+    if (!lat || !lon) {
+      return res.status(400).json({
+        success: false,
+        error: 'Latitude and longitude are required'
+      });
+    }
+    
+    const conditions = await weatherService.getAstronomyConditions(
+      parseFloat(lat),
+      parseFloat(lon)
+    );
+    
+    res.json({
+      success: true,
+      data: conditions
+    });
+  } catch (error) {
+    console.error('Weather API error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Astronomy API endpoints
+app.get('/api/astronomy/sun', async (req, res) => {
+  try {
+    const { lat, lon, date } = req.query;
+    
+    if (!lat || !lon) {
+      return res.status(400).json({
+        success: false,
+        error: 'Latitude and longitude are required'
+      });
+    }
+    
+    const sunData = await astronomyService.getSunTimes(
+      parseFloat(lat),
+      parseFloat(lon),
+      date ? new Date(date) : new Date()
+    );
+    
+    res.json({
+      success: true,
+      data: sunData
+    });
+  } catch (error) {
+    console.error('Sun times API error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/astronomy/moon', async (req, res) => {
+  try {
+    const { date } = req.query;
+    
+    const moonData = await astronomyService.getMoonData(
+      date ? new Date(date) : new Date()
+    );
+    
+    res.json({
+      success: true,
+      data: moonData
+    });
+  } catch (error) {
+    console.error('Moon data API error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+app.get('/api/astronomy/events', async (req, res) => {
+  try {
+    const { lat, lon, days } = req.query;
+    
+    const events = await astronomyService.getCelestialEvents(
+      lat ? parseFloat(lat) : 0,
+      lon ? parseFloat(lon) : 0,
+      days ? parseInt(days) : 30
+    );
+    
+    res.json({
+      success: true,
+      data: events
+    });
+  } catch (error) {
+    console.error('Celestial events API error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// NPF Rule calculation endpoint
+app.post('/api/calculations/npf', async (req, res) => {
+  try {
+    const { aperture, pixelPitch, focalLength, declination } = req.body;
+    
+    if (!aperture || !pixelPitch || !focalLength) {
+      return res.status(400).json({
+        success: false,
+        error: 'Aperture, pixel pitch, and focal length are required'
+      });
+    }
+    
+    const result = astronomyService.calculateNPFRule(
+      parseFloat(aperture),
+      parseFloat(pixelPitch),
+      parseFloat(focalLength),
+      declination ? parseFloat(declination) : 0
+    );
+    
+    res.json({
+      success: true,
+      data: result
+    });
+  } catch (error) {
+    console.error('NPF calculation error:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
   }
 });
 

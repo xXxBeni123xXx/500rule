@@ -6,14 +6,14 @@ interface UseApiState<T> {
   error: Error | null;
 }
 
-interface UseApiReturn<T> extends UseApiState<T> {
-  execute: (...args: any[]) => Promise<T | null>;
+interface UseApiReturn<T, Args extends unknown[] = unknown[]> extends UseApiState<T> {
+  execute: (...args: Args) => Promise<T | null>;
   reset: () => void;
 }
 
-export function useApi<T>(
-  apiFunction: (...args: any[]) => Promise<T>
-): UseApiReturn<T> {
+export function useApi<T, Args extends unknown[] = unknown[]>(
+  apiFunction: (...args: Args) => Promise<T>
+): UseApiReturn<T, Args> {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
     loading: false,
@@ -21,7 +21,7 @@ export function useApi<T>(
   });
 
   const execute = useCallback(
-    async (...args: any[]): Promise<T | null> => {
+    async (...args: Args): Promise<T | null> => {
       setState({ data: null, loading: true, error: null });
       
       try {
