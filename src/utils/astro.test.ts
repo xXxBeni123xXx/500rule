@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest';
-import { calculateMaxShutter, formatShutterFraction, getTrailRisk, parseAperture, calculateEffectiveFocalLength } from './astro';
+import { 
+  calculateMaxShutter, 
+  formatShutterFraction, 
+  getTrailRisk, 
+  parseAperture, 
+  calculateEffectiveFocalLength,
+  calculateNPFRule,
+  calculateSimplifiedRule,
+  calculatePixelPitch,
+  getRecommendedISO
+} from './astro';
 
 describe('Astro Utilities', () => {
   describe('calculateMaxShutter', () => {
@@ -74,6 +84,72 @@ describe('Astro Utilities', () => {
       expect(calculateEffectiveFocalLength(50, 1.5)).toBe(75);
       expect(calculateEffectiveFocalLength(24, 1.0)).toBe(24);
       expect(calculateEffectiveFocalLength(35, 1.6)).toBe(56);
+    });
+  });
+
+  describe('calculateNPFRule', () => {
+    it('should calculate NPF rule correctly', () => {
+      // 24mm f/2.8 with 4.3μm pixel pitch
+      const result = calculateNPFRule(24, 2.8, 4.3);
+      expect(result).toBeCloseTo(9.46, 1);
+    });
+
+    it('should handle declination correction', () => {
+      const result0 = calculateNPFRule(24, 2.8, 4.3, 0);
+      const result45 = calculateNPFRule(24, 2.8, 4.3, 45);
+      expect(result45).toBeGreaterThan(result0!);
+    });
+
+    it('should return null for invalid inputs', () => {
+      expect(calculateNPFRule(0, 2.8, 4.3)).toBeNull();
+      expect(calculateNPFRule(24, 0, 4.3)).toBeNull();
+      expect(calculateNPFRule(24, 2.8, 0)).toBeNull();
+    });
+  });
+
+  describe('calculateSimplifiedRule', () => {
+    it('should calculate simplified rule correctly', () => {
+      expect(calculateSimplifiedRule(50, 1.5)).toBeCloseTo(4.0, 1);
+      expect(calculateSimplifiedRule(24, 1.0)).toBeCloseTo(12.5, 1);
+    });
+
+    it('should return null for invalid inputs', () => {
+      expect(calculateSimplifiedRule(0, 1.5)).toBeNull();
+      expect(calculateSimplifiedRule(50, 0)).toBeNull();
+    });
+  });
+
+  describe('calculatePixelPitch', () => {
+    it('should calculate pixel pitch correctly', () => {
+      // Full frame sensor (36x24mm) with 24MP
+      const result = calculatePixelPitch(36, 24, 24);
+      expect(result).toBeCloseTo(6.0, 1);
+    });
+
+    it('should return null for invalid inputs', () => {
+      expect(calculatePixelPitch(0, 24, 24)).toBeNull();
+      expect(calculatePixelPitch(36, 0, 24)).toBeNull();
+      expect(calculatePixelPitch(36, 24, 0)).toBeNull();
+    });
+  });
+
+  describe('getRecommendedISO', () => {
+    it('should recommend appropriate ISO for dark skies', () => {
+      const iso = getRecommendedISO(2.8, 10, 'dark');
+      expect(iso).toBeGreaterThanOrEqual(1600);
+      expect(iso).toBeLessThanOrEqual(6400);
+    });
+
+    it('should recommend lower ISO for urban skies', () => {
+      const darkISO = getRecommendedISO(2.8, 10, 'dark');
+      const urbanISO = getRecommendedISO(2.8, 10, 'urban');
+      expect(urbanISO).toBeLessThan(darkISO);
+    });
+
+    it('should adjust ISO based on aperture', () => {
+      const isoF14 = getRecommendedISO(1.4, 10, 'dark');
+      const isoF28 = getRecommendedISO(2.8, 10, 'dark');
+      expect(isoF14).toBeLessThan(isoF28);
     });
   });
 });
