@@ -284,8 +284,13 @@ function App() {
           <p className="text-xl text-slate-300 max-w-2xl mx-auto px-4">
             Professional astrophotography exposure calculator with smart camera-lens compatibility
           </p>
-          <div className="mt-2 text-sm text-slate-400">
-            Version 2.4.0
+          <div className="mt-2 text-sm text-slate-400" title={
+            `v2.5.0:\n` +
+            `- Real light pollution overlay + VIIRS radiance\n` +
+            `- Astro conditions improvements + Open-Meteo fallback\n` +
+            `- Dedupe camera/lens data; Settings key source labels`
+          }>
+            Version 2.5.0
           </div>
           <button
             onClick={() => setShowSettings(true)}

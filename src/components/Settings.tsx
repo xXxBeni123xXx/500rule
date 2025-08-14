@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Settings as SettingsIcon, Key, Eye, EyeOff, Save, X, Check, AlertCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Key, Eye, EyeOff, Save, X, Check, AlertCircle, HelpCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SettingsProps {
@@ -188,7 +188,10 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 {/* OpenWeather API */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-slate-300">OpenWeather API Key</label>
+                    <label className="text-sm text-slate-300 flex items-center gap-2">
+                      OpenWeather API Key
+                      <HelpCircle className="h-4 w-4 text-slate-500" title="Get a free key at openweathermap.org (Account → API keys). Add to .env.local as OPENWEATHER_API_KEY or paste here." />
+                    </label>
                     <div className="flex items-center gap-2">
                       {apiStatus.openWeather ? (
                         <Check className="h-4 w-4 text-green-400" />
@@ -220,7 +223,10 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 {/* Google Maps API */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-slate-300">Google Maps API Key</label>
+                    <label className="text-sm text-slate-300 flex items-center gap-2">
+                      Google Maps API Key
+                      <HelpCircle className="h-4 w-4 text-slate-500" title="Enable Google Maps JavaScript API, Places API, and Geocoding API in Google Cloud Console. Create an API key. Add to .env.local as VITE_GOOGLE_MAPS_API_KEY or paste here." />
+                    </label>
                     <div className="flex items-center gap-2">
                       {apiStatus.googleMaps ? (
                         <Check className="h-4 w-4 text-green-400" />
@@ -252,7 +258,10 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 {/* RapidAPI */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-slate-300">RapidAPI Key</label>
+                    <label className="text-sm text-slate-300 flex items-center gap-2">
+                      RapidAPI Key
+                      <HelpCircle className="h-4 w-4 text-slate-500" title="Sign up at rapidapi.com and subscribe to a camera database API. Add RAPIDAPI_KEY (backend) and VITE_RAPIDAPI_KEY (frontend) to .env.local or paste here." />
+                    </label>
                     <div className="flex items-center gap-2">
                       {apiStatus.rapidApi ? (
                         <Check className="h-4 w-4 text-green-400" />
@@ -284,7 +293,10 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
                 {/* OpenAI Key (for AI tips) */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm text-slate-300">OpenAI API Key</label>
+                    <label className="text-sm text-slate-300 flex items-center gap-2">
+                      OpenAI API Key
+                      <HelpCircle className="h-4 w-4 text-slate-500" title="Get a key from platform.openai.com. Add OPENAI_API_KEY to .env.local (backend) or paste here to enable AI tips." />
+                    </label>
                     <div className="flex items-center gap-2">
                       {apiStatus.openai ? (
                         <Check className="h-4 w-4 text-green-400" />

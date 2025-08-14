@@ -272,17 +272,20 @@ class ExternalAPIService {
     const results = {
       flickr: [],
       unsplash: [],
+      kaggle: [],
       suggestions: []
     };
 
     // Fetch data from multiple sources
-    const [flickrData, unsplashData] = await Promise.all([
+    const [flickrData, unsplashData, kaggleData] = await Promise.all([
       this.fetchFlickrCameraData('astrophotography', 50),
-      this.fetchUnsplashPhotoData('milky way', 20)
+      this.fetchUnsplashPhotoData('milky way', 20),
+      this.importKaggleCameras()
     ]);
 
     results.flickr = flickrData;
     results.unsplash = unsplashData;
+    results.kaggle = kaggleData;
 
     // Generate suggestions based on popular combinations
     const popularCombos = flickrData
@@ -298,6 +301,38 @@ class ExternalAPIService {
     }));
 
     return results;
+  }
+
+  /**
+   * Import and normalize Kaggle 1000 cameras dataset (CSV) if available locally.
+   * Expected path: backend/data/kaggle_cameras.csv
+   */
+  async importKaggleCameras() {
+    try {
+      const csvPath = new URL('../data/kaggle_cameras.csv', import.meta.url);
+      const res = await axios.get(csvPath.href);
+      const lines = String(res.data).split('\n').filter(Boolean);
+      const header = lines.shift();
+      if (!header) return [];
+      const cols = header.split(',').map(s => s.trim());
+      const idxBrand = cols.findIndex(c => /brand/i.test(c));
+      const idxModel = cols.findIndex(c => /model/i.test(c));
+      const idxMount = cols.findIndex(c => /mount/i.test(c));
+      const idxFormat = cols.findIndex(c => /sensor|format/i.test(c));
+      const records = [];
+      for (const line of lines) {
+        const parts = line.split(',');
+        const brand = parts[idxBrand] || 'Unknown';
+        const name = parts[idxModel] || 'Unknown';
+        const mount = parts[idxMount] || 'Unknown';
+        const sensor_format = parts[idxFormat] || 'Unknown';
+        const id = `${brand}-${name}`.toLowerCase().replace(/\s+/g, '-');
+        records.push({ id, brand, name, mount, sensor_format, crop_factor: sensor_format.includes('Full') ? 1.0 : 1.5 });
+      }
+      return records;
+    } catch (e) {
+      return [];
+    }
   }
 
   /**
