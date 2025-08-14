@@ -111,9 +111,18 @@ export async function fetchBrands(): Promise<{ cameras: string[]; lenses: string
 }
 
 // Health check
-export async function checkHealth(): Promise<any> {
+interface HealthResponse {
+  status: string;
+  message: string;
+  database?: {
+    cameras: number;
+    lenses: number;
+  };
+}
+
+export async function checkHealth(): Promise<HealthResponse> {
   try {
-    const response = await api.get('/health');
+    const response = await api.get<HealthResponse>('/health');
     return response.data;
   } catch (error) {
     console.error('Health check failed:', error);

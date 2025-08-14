@@ -15,7 +15,7 @@ class MockIntersectionObserver implements IntersectionObserver {
   }
 }
 
-global.IntersectionObserver = MockIntersectionObserver as any;
+global.IntersectionObserver = MockIntersectionObserver as unknown as typeof IntersectionObserver;
 
 // Mock window.matchMedia
 Object.defineProperty(window, 'matchMedia', {

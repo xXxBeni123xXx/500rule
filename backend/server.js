@@ -4,6 +4,7 @@ import axios from 'axios';
 import { CAMERA_DATABASE } from './data/cameras.js';
 import { LENS_DATABASE } from './data/lenses.js';
 import { MOUNT_COMPATIBILITY } from './data/mountCompatibility.js';
+import externalAPIs from './services/externalAPIs.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -361,6 +362,91 @@ app.get('/api/compatibility/:cameraId', (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Weather and conditions endpoints
+app.get('/api/weather', async (req, res) => {
+  try {
+    const { lat, lon } = req.query;
+    
+    if (!lat || !lon) {
+      return res.status(400).json({
+        success: false,
+        error: 'Latitude and longitude are required'
+      });
+    }
+    
+    const weather = await externalAPIs.fetchWeatherData(lat, lon);
+    
+    res.json({
+      success: true,
+      data: weather
+    });
+  } catch (error) {
+    console.error('Weather endpoint error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch weather data'
+    });
+  }
+});
+
+// Moon phase endpoint
+app.get('/api/moon-phase', async (req, res) => {
+  try {
+    const { date } = req.query;
+    const targetDate = date ? new Date(date) : new Date();
+    
+    const moonPhase = await externalAPIs.fetchMoonPhase(targetDate);
+    
+    res.json({
+      success: true,
+      data: moonPhase
+    });
+  } catch (error) {
+    console.error('Moon phase endpoint error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to calculate moon phase'
+    });
+  }
+});
+
+// Aurora forecast endpoint
+app.get('/api/aurora-forecast', async (req, res) => {
+  try {
+    const forecast = await externalAPIs.fetchAuroraForecast();
+    
+    res.json({
+      success: true,
+      data: forecast
+    });
+  } catch (error) {
+    console.error('Aurora forecast endpoint error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch aurora forecast'
+    });
+  }
+});
+
+// Equipment suggestions endpoint
+app.get('/api/equipment-suggestions', async (req, res) => {
+  try {
+    const suggestions = await externalAPIs.aggregateEquipmentData();
+    
+    res.json({
+      success: true,
+      data: suggestions,
+      cached_at: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Equipment suggestions endpoint error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch equipment suggestions'
+    });
   }
 });
 
