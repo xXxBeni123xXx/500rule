@@ -51,6 +51,11 @@ function App() {
   // Data
   const [allCameras, setAllCameras] = useState<Camera[]>([]);
   const [allCompatibleLenses, setAllCompatibleLenses] = useState<LensType[]>([]);
+  // Cross-component shared state
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [weatherConditions, setWeatherConditions] = useState<any | null>(null);
+  const [moonPhase, setMoonPhase] = useState<any | null>(null);
+  const [aurora, setAurora] = useState<any | null>(null);
 
   // Load cameras on mount
   useEffect(() => {
@@ -262,7 +267,7 @@ function App() {
             Professional astrophotography exposure calculator with smart camera-lens compatibility
           </p>
           <div className="mt-2 text-sm text-slate-400">
-            Version 2.4.0 | NPF Rule | Smart Tips | 500+ Equipment Database
+            Version 2.4.0
           </div>
           <button
             onClick={() => setShowSettings(true)}
@@ -640,24 +645,24 @@ function App() {
                       ))}
                     </div>
                     
-                    {/* Simple Rules Options */}
-                    {ruleType === 'simple' && (
-                      <div className="grid grid-cols-4 gap-2">
-                        {([500, 400, 300, 200] as const).map((rule) => (
-                          <button
-                            key={rule}
-                            onClick={() => setRuleConstant(rule)}
-                            className={`py-2 px-3 rounded-lg font-medium text-sm transition-all ${
-                              ruleConstant === rule
-                                ? 'bg-blue-500 text-white'
-                                : 'bg-white/10 text-slate-300 hover:bg-white/20'
-                            }`}
-                          >
-                            {rule}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  {/* Simple Rules Options */}
+                  {ruleType === 'simple' && (
+                    <div className="grid grid-cols-4 gap-2">
+                      {([500, 400, 300, 200] as const).map((rule) => (
+                        <button
+                          key={rule}
+                          onClick={() => setRuleConstant(rule)}
+                          className={`py-2 px-3 rounded-lg font-medium text-sm transition-all ${
+                            ruleConstant === rule
+                              ? 'bg-blue-500 text-white'
+                              : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                          }`}
+                        >
+                          {rule}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                     
                     {/* NPF Rule Inputs */}
                     {ruleType === 'npf' && selectedLens && (
@@ -826,13 +831,13 @@ function App() {
                     <label className="block text-sm font-medium text-slate-300 mb-3">
                       Exposure Rule
                     </label>
-                    <div className="flex gap-2">
-                      {[500, 400].map((rule) => (
+                    <div className="grid grid-cols-4 gap-2">
+                      {[500, 400, 300, 200].map((rule) => (
                         <button
                           key={rule}
                           onClick={() => setManualRule(rule as RuleConstant)}
-                          className={`flex-1 py-3 px-4 rounded-lg font-medium transition-all ${
-                            manualRule === rule
+                          className={`py-3 px-4 rounded-lg font-medium transition-all ${
+                            manualRule === (rule as RuleConstant)
                               ? 'bg-blue-500 text-white'
                               : 'bg-white/10 text-slate-300 hover:bg-white/20'
                           }`}
@@ -841,6 +846,9 @@ function App() {
                         </button>
                       ))}
                     </div>
+                    <p className="mt-2 text-xs text-slate-400">
+                      500/400: wide to normal lenses; 300/200: telephoto, more conservative.
+                    </p>
                   </div>
                 </div>
               </motion.div>
@@ -922,7 +930,14 @@ function App() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
-              <AstroConditions />
+              <AstroConditions 
+                onLocationChange={(loc) => setUserLocation({ lat: loc.lat, lng: loc.lng })}
+                onConditionsChange={(data) => {
+                  setWeatherConditions(data.weather || null);
+                  setMoonPhase(data.moonPhase || null);
+                  setAurora(data.aurora || null);
+                }}
+              />
             </motion.div>
 
             {/* Session Export */}
@@ -933,16 +948,21 @@ function App() {
                 transition={{ duration: 0.6, delay: 1 }}
                 className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
               >
-                <SessionExport 
-                  sessionData={{
-                    camera: selectedCamera,
-                    lens: selectedLens,
-                    focalLength: effectiveFocalLength,
-                    shutterSpeed: maxShutter,
-                    ruleConstant: activeTab === 'guided' ? ruleConstant : manualRule,
-                    trailRisk: trailRisk || 'unknown'
-                  }}
-                />
+                  <SessionExport 
+                    sessionData={{
+                      camera: selectedCamera,
+                      lens: selectedLens,
+                      focalLength: effectiveFocalLength,
+                      shutterSpeed: maxShutter,
+                      ruleConstant: activeTab === 'guided' ? ruleConstant : manualRule,
+                      trailRisk: trailRisk || 'unknown',
+                      conditions: weatherConditions || moonPhase || aurora ? {
+                        weather: weatherConditions || undefined,
+                        moonPhase: moonPhase || undefined,
+                        aurora: aurora || undefined
+                      } : undefined
+                    }}
+                  />
               </motion.div>
             )}
           </div>
@@ -956,10 +976,13 @@ function App() {
             <SmartTips 
               focalLength={effectiveFocalLength || undefined}
               cropFactor={cropFactor || undefined}
-              currentCamera={selectedCamera ? `${selectedCamera.brand} ${selectedCamera.name}` : undefined}
-              currentLens={selectedLens ? `${selectedLens.brand} ${selectedLens.name}` : undefined}
+              currentCamera={selectedCamera || undefined}
+              currentLens={selectedLens || undefined}
               maxShutter={maxShutter}
               trailRisk={trailRisk}
+              weatherConditions={weatherConditions || undefined}
+              moonPhase={moonPhase || undefined}
+              location={userLocation || undefined}
             />
           </motion.div>
         </div>

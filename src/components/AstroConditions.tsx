@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Cloud, Moon, Activity, MapPin, Wind, Droplets, Eye, Calendar, Clock } from 'lucide-react';
+import { Cloud, Moon, Activity, MapPin, Wind, Droplets, Eye, Calendar } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
-import { SimpleLocationPicker } from './SimpleLocationPicker';
-// import { DarkSkyMap } from './DarkSkyMap'; // Temporarily disabled until Google Maps API is configured
+import { LocationPicker } from './LocationPicker';
+import { DarkSkyMap } from './DarkSkyMap';
 
 interface WeatherData {
   cloudCover: number;
@@ -33,18 +33,21 @@ interface AuroraData {
 interface AstroConditionsProps {
   latitude?: number;
   longitude?: number;
+  onLocationChange?: (loc: { lat: number; lng: number; name?: string }) => void;
+  onConditionsChange?: (data: { weather?: WeatherData | null; moonPhase?: MoonPhaseData | null; aurora?: AuroraData | null }) => void;
 }
 
-export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
+export function AstroConditions({ latitude, longitude, onLocationChange, onConditionsChange }: AstroConditionsProps) {
   const [weather, setWeather] = useState<WeatherData | null>(null);
   const [moonPhase, setMoonPhase] = useState<MoonPhaseData | null>(null);
   const [aurora, setAurora] = useState<AuroraData | null>(null);
   const [loading, setLoading] = useState(false);
   const [location, setLocation] = useState({ lat: latitude || 0, lng: longitude || 0 });
   const [showDarkSkyMap, setShowDarkSkyMap] = useState(false);
-  const [showLocationPicker, setShowLocationPicker] = useState(!latitude || !longitude);
+  // Location picker is always available via component; no toggle state needed
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [selectedTime, setSelectedTime] = useState(new Date().toTimeString().slice(0, 5));
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (location.lat && location.lng) {
@@ -55,28 +58,48 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
 
   const fetchConditions = async () => {
     setLoading(true);
+    setError(null);
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
-      
+      const when = new Date(`${selectedDate}T${selectedTime}:00`);
       const [weatherRes, moonRes, auroraRes] = await Promise.allSettled([
         axios.get(`${baseURL}/weather`, {
           params: { lat: location.lat, lon: location.lng }
         }),
-        axios.get(`${baseURL}/moon-phase`),
+        axios.get(`${baseURL}/moon-phase`, { params: { date: when.toISOString() } }),
         axios.get(`${baseURL}/aurora-forecast`)
       ]);
 
       if (weatherRes.status === 'fulfilled') {
-        setWeather(weatherRes.value.data.data);
+        const w = weatherRes.value.data.data || null;
+        setWeather(w);
       }
       if (moonRes.status === 'fulfilled') {
-        setMoonPhase(moonRes.value.data.data);
+        const m = moonRes.value.data.data || null;
+        setMoonPhase(m);
       }
       if (auroraRes.status === 'fulfilled') {
-        setAurora(auroraRes.value.data.data);
+        const a = auroraRes.value.data.data || null;
+        setAurora(a);
+      }
+
+      if (onConditionsChange) {
+        onConditionsChange({
+          weather: weatherRes.status === 'fulfilled' ? weatherRes.value.data.data || null : null,
+          moonPhase: moonRes.status === 'fulfilled' ? moonRes.value.data.data || null : null,
+          aurora: auroraRes.status === 'fulfilled' ? auroraRes.value.data.data || null : null
+        });
+      }
+      if (
+        (weatherRes.status === 'rejected' || !weatherRes.value?.data?.success) &&
+        (moonRes.status === 'rejected' || !moonRes.value?.data?.success) &&
+        (auroraRes.status === 'rejected' || !auroraRes.value?.data?.success)
+      ) {
+        setError('Failed to fetch conditions. Check API keys in Settings.');
       }
     } catch (error) {
       console.error('Error fetching conditions:', error);
+      setError('Error fetching conditions');
     } finally {
       setLoading(false);
     }
@@ -128,7 +151,8 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
 
   const handleLocationSelect = (newLocation: { lat: number; lng: number; name?: string }) => {
     setLocation(newLocation);
-    setShowLocationPicker(false);
+    // intentionally no toggle state
+    if (onLocationChange) onLocationChange(newLocation);
   };
 
   if (loading) {
@@ -143,7 +167,7 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
 
   return (
     <div className="space-y-6">
-      {/* Location Picker */}
+       {/* Location Picker */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -153,10 +177,13 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
           <MapPin className="h-5 w-5 text-blue-400" />
           Observation Location
         </h3>
-        <SimpleLocationPicker 
+        <LocationPicker 
           onLocationSelect={handleLocationSelect}
           initialLocation={location}
         />
+         <div className="mt-2 text-xs text-slate-400">
+           Tip: Use the map or search to set your exact observing spot. This updates conditions and tips.
+         </div>
         
         {/* Toggle Dark Sky Map */}
         <button
@@ -168,8 +195,8 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
         </button>
       </motion.div>
 
-      {/* Dark Sky Map - Temporarily disabled until Google Maps API is configured */}
-      {/* {showDarkSkyMap && location.lat && location.lng && (
+      {/* Dark Sky Map */}
+      {showDarkSkyMap && location.lat && location.lng && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -179,10 +206,11 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
             userLocation={location}
             onLocationSelect={(darkSkyLocation) => {
               setLocation({ lat: darkSkyLocation.lat, lng: darkSkyLocation.lng });
+              setShowDarkSkyMap(false);
             }}
           />
         </motion.div>
-      )} */}
+      )}
 
       {/* Date/Time Selector */}
       {location.lat && location.lng && (
@@ -239,6 +267,10 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
               {score.toFixed(0)}%
             </div>
           </div>
+
+          {error && (
+            <div className="mb-4 text-xs text-red-400">{error}</div>
+          )}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Weather Card */}
@@ -348,7 +380,17 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
           {score >= 80 && (
             <li className="text-green-400">• Excellent conditions for deep-sky imaging!</li>
           )}
+          {!weather && !moonPhase && !aurora && (
+            <li>• No live data. Add API keys in Settings or try again later.</li>
+          )}
         </ul>
+      </div>
+      
+      {/* Explanations */}
+      <div className="mt-3 p-3 bg-blue-900/20 border border-blue-700/30 rounded-lg text-xs text-blue-200 space-y-1">
+        <div>• Condition score weighs cloud cover, moon illumination, humidity, and wind.</div>
+        <div>• Lower Bortle class means darker skies. Class 1-2 are the darkest.</div>
+        <div>• Use NPF rule for high-res sensors; Simple rules for quick field math.</div>
       </div>
         </motion.div>
       )}

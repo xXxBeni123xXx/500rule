@@ -23,7 +23,7 @@ const loadGoogleMapsScript = (apiKey: string): Promise<void> => {
     }
 
     const script = document.createElement('script');
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places,visualization`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();
@@ -49,7 +49,9 @@ export function LocationPicker({ onLocationSelect, initialLocation }: LocationPi
 
   // Initialize Google Maps
   useEffect(() => {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+    const storedKeys = localStorage.getItem('userApiKeys');
+    const userKeys = storedKeys ? JSON.parse(storedKeys) : {};
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || userKeys.googleMaps;
     if (!apiKey) {
       setError('Google Maps API key not configured');
       return;

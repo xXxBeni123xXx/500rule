@@ -2,7 +2,7 @@
 
 A professional, full-stack web application for calculating optimal exposure times for astrophotography using multiple calculation methods including the 500-rule, NPF rule, and more. Features intelligent camera-lens compatibility matching, comprehensive equipment database, location-based weather conditions, and smart equipment suggestions.
 
-![500-Rule Calculator](https://img.shields.io/badge/Version-2.3.0-blue.svg)
+![500-Rule Calculator](https://img.shields.io/badge/Version-2.4.0-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-brightgreen.svg)
 ![React](https://img.shields.io/badge/React-18-blue.svg)
@@ -35,8 +35,10 @@ A professional, full-stack web application for calculating optimal exposure time
 - **Tab Navigation**: Switch between guided and manual modes
 
 ### 🗄️ Comprehensive Database
-- **150+ Camera Bodies**: Canon, Sony, Nikon, Fujifilm, Olympus, Panasonic, Leica, Pentax
-- **200+ Lenses**: First-party and third-party (Sigma, Tamron, Tokina, Zeiss, Laowa, Rokinon, Viltrox)
+- **265+ Equipment Items**: Expanded database with astrophotography-specific gear
+- **122 Camera Bodies**: Canon, Sony, Nikon, Fujifilm, Olympus, Panasonic, Leica, Pentax, ZWO, QHYCCD, Hasselblad, OM System
+- **143 Lenses**: First-party and third-party (Sigma Art, Tamron, Tokina, Zeiss, Laowa, Rokinon, Viltrox, Irix, Venus Optics)
+- **Astro-Modified Cameras**: Canon Ra, 60Da and dedicated astronomy cameras
 - **Fixed Lens Cameras**: X100 series, Leica Q2 with built-in lens specifications
 - **Mount Compatibility**: Automatic lens filtering based on camera mount
 
@@ -50,12 +52,24 @@ A professional, full-stack web application for calculating optimal exposure time
 - **Moon Phase Tracking**: Current moon phase and illumination
 - **Aurora Forecast**: KP index and visibility predictions
 
-### 💡 Smart Features (v2.2.0)
-- **Equipment Suggestions**: 
-  - Camera upgrade recommendations
-  - Lens suggestions based on your setup
-  - Essential accessories for astrophotography
-  - Filter recommendations
+### 💡 Smart Features (v2.4.0)
+- **AI-Powered Recommendations**: 
+  - OpenAI integration for intelligent tips based on your exact setup
+  - Context-aware suggestions considering camera, lens, location, and conditions
+  - Equipment upgrade recommendations
+  - Session planning assistance
+- **Enhanced Location Features**:
+  - Google Maps integration with pinpoint selection
+  - Dark sky locations sorted by proximity
+  - Interactive dark sky map overlay
+- **Improved PWA Support**:
+  - Offline functionality with smart caching
+  - Install as native app on mobile/desktop
+  - Background sync for API data
+- **Settings Management**:
+  - User API key configuration
+  - Override system API keys
+  - Dark mode and cache controls
 - **Session Export**: Export your session plan as text, JSON, or calendar event
 - **Pro Tips**: Context-aware tips and best practices
 

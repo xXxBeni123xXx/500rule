@@ -1,10 +1,15 @@
 import express from 'express';
 import cors from 'cors';
 import axios from 'axios';
+import dotenv from 'dotenv';
 import { CAMERA_DATABASE } from './data/cameras.js';
 import { LENS_DATABASE } from './data/lenses.js';
 import { MOUNT_COMPATIBILITY } from './data/mountCompatibility.js';
 import externalAPIs from './services/externalAPIs.js';
+import openaiService from './services/openaiService.js';
+
+// Load environment variables
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -455,33 +460,95 @@ app.get('/api/equipment-suggestions', async (req, res) => {
   }
 });
 
-// AI-powered tips endpoint (secure - backend only)
+// AI-powered tips endpoint (improved with OpenAI service)
 app.post('/api/ai/tips', async (req, res) => {
   try {
-    if (!OPENAI_API_KEY) {
-      return res.status(400).json({ success: false, error: 'OpenAI API key not configured on server' });
-    }
-    const { camera, lens, focalLength, cropFactor, exposureSeconds, conditions } = req.body || {};
-    const systemPrompt = `You are an expert astrophotography assistant. Provide short, actionable tips (max 5) for night sky shooting.
-Context: equipment, exposure, risk, weather, moon, aurora. Avoid generic advice. Prefer practical steps.`;
-    const userPrompt = JSON.stringify({ camera, lens, focalLength, cropFactor, exposureSeconds, conditions });
-    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
-      model: 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: userPrompt }
-      ],
-      temperature: 0.5,
-      max_tokens: 300
-    }, {
-      headers: { Authorization: `Bearer ${OPENAI_API_KEY}` }
+    const { camera, lens, location, skyConditions, targetObject } = req.body || {};
+    
+    // Use the new OpenAI service
+    const result = await openaiService.generateAstroTips({
+      camera,
+      lens,
+      location,
+      skyConditions,
+      targetObject
     });
-    const text = response.data?.choices?.[0]?.message?.content || '';
-    res.json({ success: true, tips: text });
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    
+    res.json(result);
   } catch (error) {
-    console.error('AI tips error:', error?.response?.data || error.message);
+    console.error('AI tips error:', error);
     res.status(500).json({ success: false, error: 'Failed to generate AI tips' });
   }
+});
+
+// Equipment recommendations endpoint
+app.post('/api/ai/equipment-recommendations', async (req, res) => {
+  try {
+    const result = await openaiService.generateEquipmentRecommendations(req.body);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Equipment recommendations error:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate recommendations' });
+  }
+});
+
+// Session planning endpoint
+app.post('/api/ai/session-plan', async (req, res) => {
+  try {
+    const result = await openaiService.generateSessionPlan(req.body);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Session planning error:', error);
+    res.status(500).json({ success: false, error: 'Failed to generate session plan' });
+  }
+});
+
+// Image analysis endpoint
+app.post('/api/ai/analyze-image', async (req, res) => {
+  try {
+    const { imageData, analysisType } = req.body;
+    
+    if (!imageData) {
+      return res.status(400).json({ success: false, error: 'Image data required' });
+    }
+    
+    const result = await openaiService.analyzeImage(imageData, analysisType);
+    
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    
+    res.json(result);
+  } catch (error) {
+    console.error('Image analysis error:', error);
+    res.status(500).json({ success: false, error: 'Failed to analyze image' });
+  }
+});
+
+// API configuration status endpoint
+app.get('/api/config-status', (req, res) => {
+  res.json({
+    openai: openaiService.isConfigured(),
+    rapidapi: !!RAPIDAPI_KEY,
+    openweather: !!OPENWEATHER_API_KEY,
+    googleMaps: !!process.env.GOOGLE_MAPS_API_KEY || !!process.env.VITE_GOOGLE_MAPS_API_KEY,
+    flickr: !!process.env.FLICKR_API_KEY,
+    unsplash: !!process.env.UNSPLASH_ACCESS_KEY
+  });
 });
 
 // Start server and initialize cache

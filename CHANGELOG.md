@@ -4,30 +4,61 @@ All notable changes to the 500-Rule Astrophotography Calculator project.
 
 ## [2.4.0] - 2024-01-16
 
+### 🚀 Major Features
+
+#### AI Integration
+- **OpenAI Integration**: Smart tips and recommendations powered by GPT
+- **Context-Aware Suggestions**: AI analyzes your exact camera, lens, location, and conditions
+- **Equipment Recommendations**: Intelligent upgrade suggestions based on your needs
+- **Session Planning**: AI-powered photography session planning
+- **Image Analysis**: Future support for analyzing your astrophotography images
+
+#### Enhanced Location System
+- **Google Maps Integration**: Full map with pinpoint selection capability
+- **Dark Sky Map**: Interactive overlay showing light pollution levels
+- **Location Sorting**: Dark sky locations automatically sorted by proximity
+- **Expanded Database**: 24+ dark sky locations worldwide
+- **Future Date/Time**: Plan sessions with specific date/time selection
+
+#### Equipment Database Expansion
+- **265+ Total Items**: Massive expansion from 209 to 265 pieces of equipment
+- **122 Cameras**: Added ZWO, QHYCCD astronomy cameras, latest mirrorless models
+- **143 Lenses**: Added Sigma Art, Irix, Venus Optics, and more astro-specific glass
+- **Astro-Modified**: Canon Ra, 60Da, and dedicated astronomy cameras included
+
+#### PWA & Offline Support
+- **Enhanced Service Worker**: Smart caching strategies for offline use
+- **Install as App**: Full PWA support for mobile and desktop installation
+- **Background Sync**: API data syncs when connection restored
+- **Offline Mode**: Core functionality works without internet
+
+#### Settings & Security
+- **API Key Management**: Users can add their own API keys
+- **Secure Storage**: API keys stored locally, never sent to servers
+- **Override Options**: Override system API keys with personal ones
+- **Configuration Status**: Visual indicators for API availability
+
 ### 🎯 Improvements & Fixes
 
 #### UI Enhancements
-- **Camera/Lens Count Display**: Shows total count of cameras and lenses even when not searching
-- **Removed Simplified Rule**: Streamlined to Simple Rules and NPF Rule only
-- **Enhanced Tooltips**: More detailed explanations for calculation methods with recommendations
+- **Version Display**: Simplified to show only version number
+- **App Icon**: Custom astrophotography-themed icon
+- **Browser Tab**: Updated title and description
+- **Dynamic Updates**: Formula and aperture update automatically
+- **Mobile Optimization**: Improved responsive design
 
 #### Smart Tips System
-- **Replaced Equipment Suggestions**: New contextual tips based on YOUR equipment
-- **Dynamic Recommendations**: Tips change based on camera, lens, exposure time, and conditions
-- **Best Practices**: Includes focus tips, ISO recommendations, and shooting strategies
-- **Quick Reference**: Added handy reference for white balance, file format, etc.
-
-#### Location Features
-- **Expanded Dark Sky Database**: 24 locations worldwide (was 8)
-  - North America: 10 locations
-  - Europe: 6 locations
-  - Southern Hemisphere: 5 locations
-  - Asia: 3 locations
-- **Better Sorting**: Locations sorted by distance from selected location
+- **AI-Powered Tips**: OpenAI generates tips specific to your setup
+- **Dynamic Recommendations**: Tips change based on all parameters
+- **Best Practices**: Context-aware shooting strategies
+- **Quick Reference**: Handy reference for settings
 
 #### Bug Fixes
+- **WebSocket Errors**: Fixed connection issues
 - **Service Worker**: Fixed chrome-extension request errors
-- **PWA Manifest**: Fixed deprecated meta tags
+- **PWA Manifest**: Updated with proper icons
+- **Dark Sky Map**: Re-enabled with Google Maps support
+- **Astrophotography Conditions**: Fixed functionality issues
 - **Icon Loading**: Resolved manifest icon loading issues
 
 ### 🔧 Technical Improvements

@@ -199,6 +199,8 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
     setShowLightPollution(!showLightPollution);
   };
 
+  const googleLoaded = typeof window !== 'undefined' && !!window.google?.maps;
+
   return (
     <div className="space-y-4">
       {/* Map Controls */}
@@ -222,31 +224,42 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
 
       {/* Map Container */}
       <div className="relative">
-        <div
-          ref={mapRef}
-          className="w-full h-96 rounded-lg overflow-hidden border border-white/20"
-        />
+        {!googleLoaded ? (
+          <div className="w-full h-96 rounded-lg overflow-hidden border border-white/20 flex items-center justify-center text-slate-300 text-sm">
+            Google Maps not available. Add API key in Settings.
+          </div>
+        ) : (
+          <div
+            ref={mapRef}
+            className="w-full h-96 rounded-lg overflow-hidden border border-white/20"
+          />
+        )}
         
-        {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur-sm rounded-lg p-3 text-xs">
-          <div className="font-semibold text-white mb-2">Bortle Scale</div>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[1] }} />
-              <span className="text-slate-300">Class 1-2: Excellent</span>
+        {/* Legend & Explanations */}
+        <div className="absolute bottom-4 left-4 bg-slate-900/90 backdrop-blur-sm rounded-lg p-3 text-xs space-y-2 max-w-sm">
+          <div>
+            <div className="font-semibold text-white mb-1">Bortle Scale</div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[1] }} />
+                <span className="text-slate-300">Class 1-2: Very dark sky (best)</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[3] }} />
+                <span className="text-slate-300">Class 3-4: Rural to suburban</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[5] }} />
+                <span className="text-slate-300">Class 5-6: Suburban sky</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[7] }} />
+                <span className="text-slate-300">Class 7-9: Urban/City (worst)</span>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[3] }} />
-              <span className="text-slate-300">Class 3-4: Good</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[5] }} />
-              <span className="text-slate-300">Class 5-6: Moderate</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: BORTLE_COLORS[7] }} />
-              <span className="text-slate-300">Class 7-9: Poor</span>
-            </div>
+          </div>
+          <div className="text-slate-300">
+            Heatmap shows simulated light pollution intensity. Aim for darker colors for better astrophotography.
           </div>
         </div>
 
@@ -315,7 +328,7 @@ export function DarkSkyMap({ userLocation, onLocationSelect }: DarkSkyMapProps) 
           <Info className="h-4 w-4 text-blue-400 mt-0.5" />
           <div className="text-xs text-blue-300">
             <p className="mb-1">Star markers show designated dark sky locations with minimal light pollution.</p>
-            <p>Click on any marker to see details and get directions.</p>
+            <p>Click on any marker to see details. Toggle "Light Pollution" to view the simulated glow overlay.</p>
           </div>
         </div>
       </div>

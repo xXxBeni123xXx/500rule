@@ -68,7 +68,25 @@ export function Settings({ isOpen, onClose }: SettingsProps) {
   }, []);
 
   const checkApiStatus = async () => {
-    // Check which APIs are configured (either from env or user)
+    try {
+      // Prefer backend config status if available
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const res = await fetch(`${baseURL}/config-status`);
+      if (res.ok) {
+        const data = await res.json();
+        setApiStatus({
+          openWeather: !!data.openweather || !!apiKeys.openWeather,
+          googleMaps: !!data.googleMaps || !!apiKeys.googleMaps,
+          rapidApi: !!data.rapidapi || !!apiKeys.rapidApi,
+          flickr: !!data.flickr || !!apiKeys.flickr,
+          unsplash: !!data.unsplash || !!apiKeys.unsplash,
+          openai: !!data.openai || !!apiKeys.openai,
+        });
+        return;
+      }
+    } catch (e) {
+      // fallback to env-only check
+    }
     const status: ApiStatus = {
       openWeather: !!import.meta.env.VITE_OPENWEATHER_API_KEY || !!apiKeys.openWeather,
       googleMaps: !!import.meta.env.VITE_GOOGLE_MAPS_API_KEY || !!apiKeys.googleMaps,

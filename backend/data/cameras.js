@@ -122,4 +122,46 @@ export const CAMERA_DATABASE = [
   // Leica
   { id: 'leica-q2', brand: 'Leica', name: 'Q2', mount: 'Fixed Lens (28mm f/1.7)', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 47, price_range: 'Professional' },
   { id: 'leica-sl2', brand: 'Leica', name: 'SL2', mount: 'Leica L', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 47, price_range: 'Professional' },
+  
+  // Additional Astrophotography-Popular Cameras
+  // Canon Astro-Modified
+  { id: 'canon-eos-ra', brand: 'Canon', name: 'EOS Ra', mount: 'Canon RF', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 30, price_range: 'Professional', astro_modified: true },
+  { id: 'canon-60da', brand: 'Canon', name: 'EOS 60Da', mount: 'Canon EF', sensor_format: 'APS-C', crop_factor: 1.6, megapixels: 18, price_range: 'Enthusiast', astro_modified: true },
+  
+  // Nikon Z Mount Additional
+  { id: 'nikon-z8', brand: 'Nikon', name: 'Z8', mount: 'Nikon Z', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 46, price_range: 'Professional' },
+  { id: 'nikon-zf', brand: 'Nikon', name: 'Zf', mount: 'Nikon Z', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 24, price_range: 'Enthusiast' },
+  { id: 'nikon-z30', brand: 'Nikon', name: 'Z30', mount: 'Nikon Z', sensor_format: 'APS-C', crop_factor: 1.5, megapixels: 21, price_range: 'Entry' },
+  
+  // Sony Additional Models
+  { id: 'sony-a7c-ii', brand: 'Sony', name: 'α7C II', mount: 'Sony E', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 33, price_range: 'Enthusiast' },
+  { id: 'sony-a7cr', brand: 'Sony', name: 'α7CR', mount: 'Sony E', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 61, price_range: 'Professional' },
+  { id: 'sony-fx3', brand: 'Sony', name: 'FX3', mount: 'Sony E', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 12, price_range: 'Professional' },
+  { id: 'sony-fx30', brand: 'Sony', name: 'FX30', mount: 'Sony E', sensor_format: 'APS-C', crop_factor: 1.5, megapixels: 26, price_range: 'Professional' },
+  
+  // Dedicated Astro Cameras
+  { id: 'zwo-asi2600mc', brand: 'ZWO', name: 'ASI2600MC Pro', mount: 'Telescope', sensor_format: 'APS-C', crop_factor: 1.5, megapixels: 26, price_range: 'Professional', astro_dedicated: true },
+  { id: 'zwo-asi533mc', brand: 'ZWO', name: 'ASI533MC Pro', mount: 'Telescope', sensor_format: '1-inch', crop_factor: 2.7, megapixels: 9, price_range: 'Enthusiast', astro_dedicated: true },
+  { id: 'zwo-asi294mc', brand: 'ZWO', name: 'ASI294MC Pro', mount: 'Telescope', sensor_format: 'Four Thirds', crop_factor: 2.0, megapixels: 11.7, price_range: 'Professional', astro_dedicated: true },
+  { id: 'qhy-268c', brand: 'QHYCCD', name: 'QHY268C', mount: 'Telescope', sensor_format: 'APS-C', crop_factor: 1.5, megapixels: 26, price_range: 'Professional', astro_dedicated: true },
+  
+  // Panasonic S Series
+  { id: 'panasonic-s5-ii', brand: 'Panasonic', name: 'LUMIX S5 II', mount: 'Leica L', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 24, price_range: 'Enthusiast' },
+  { id: 'panasonic-s5-iix', brand: 'Panasonic', name: 'LUMIX S5 IIX', mount: 'Leica L', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 24, price_range: 'Professional' },
+  
+  // Sigma
+  { id: 'sigma-fp', brand: 'Sigma', name: 'fp', mount: 'Leica L', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 24, price_range: 'Enthusiast' },
+  { id: 'sigma-fp-l', brand: 'Sigma', name: 'fp L', mount: 'Leica L', sensor_format: 'Full Frame', crop_factor: 1.0, megapixels: 61, price_range: 'Professional' },
+  
+  // Blackmagic
+  { id: 'blackmagic-pocket-6k', brand: 'Blackmagic', name: 'Pocket Cinema Camera 6K', mount: 'Canon EF', sensor_format: 'Super 35', crop_factor: 1.56, megapixels: 21, price_range: 'Professional' },
+  { id: 'blackmagic-pocket-4k', brand: 'Blackmagic', name: 'Pocket Cinema Camera 4K', mount: 'Micro Four Thirds', sensor_format: 'Micro Four Thirds', crop_factor: 2.0, megapixels: 8, price_range: 'Enthusiast' },
+  
+  // Hasselblad
+  { id: 'hasselblad-x2d-100c', brand: 'Hasselblad', name: 'X2D 100C', mount: 'Hasselblad X', sensor_format: 'Medium Format', crop_factor: 0.79, megapixels: 100, price_range: 'Professional' },
+  { id: 'hasselblad-907x', brand: 'Hasselblad', name: '907X 50C', mount: 'Hasselblad X', sensor_format: 'Medium Format', crop_factor: 0.79, megapixels: 50, price_range: 'Professional' },
+  
+  // OM System (formerly Olympus)
+  { id: 'om-system-om1', brand: 'OM System', name: 'OM-1', mount: 'Micro Four Thirds', sensor_format: 'Micro Four Thirds', crop_factor: 2.0, megapixels: 20, price_range: 'Professional' },
+  { id: 'om-system-om5', brand: 'OM System', name: 'OM-5', mount: 'Micro Four Thirds', sensor_format: 'Micro Four Thirds', crop_factor: 2.0, megapixels: 20, price_range: 'Enthusiast' },
 ]; 

@@ -117,31 +117,63 @@ class ExternalAPIService {
    * Fetch weather conditions for astrophotography planning
    */
   async fetchWeatherData(lat, lon) {
-    if (!this.openWeatherApiKey) {
-      console.warn('OpenWeather API key not configured');
-      return null;
-    }
-
     try {
-      const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
+      // Prefer OpenWeather if configured
+      if (this.openWeatherApiKey) {
+        const response = await axios.get('https://api.openweathermap.org/data/2.5/weather', {
+          params: {
+            lat,
+            lon,
+            appid: this.openWeatherApiKey,
+            units: 'metric'
+          }
+        });
+
+        const data = response.data;
+        return {
+          cloudCover: data.clouds?.all || 0,
+          visibility: data.visibility || 10000,
+          humidity: data.main?.humidity || 0,
+          temperature: data.main?.temp || 0,
+          windSpeed: data.wind?.speed || 0,
+          description: data.weather?.[0]?.description || '',
+          sunrise: data.sys?.sunrise,
+          sunset: data.sys?.sunset
+        };
+      }
+
+      // Fallback: Open-Meteo (no API key required)
+      console.warn('OpenWeather API key not configured. Falling back to Open-Meteo.');
+      const omResponse = await axios.get('https://api.open-meteo.com/v1/forecast', {
         params: {
-          lat,
-          lon,
-          appid: this.openWeatherApiKey,
-          units: 'metric'
+          latitude: lat,
+          longitude: lon,
+          current_weather: true,
+          hourly: 'cloudcover,relativehumidity_2m,visibility,windspeed_10m',
+          timezone: 'auto'
         }
       });
 
-      const data = response.data;
+      const om = omResponse.data;
+      const idx = 0;
+      const current = om.current_weather || {};
+      const hourly = om.hourly || {};
+
+      const cloudCover = Array.isArray(hourly.cloudcover) ? hourly.cloudcover[idx] : 0;
+      const humidity = Array.isArray(hourly.relativehumidity_2m) ? hourly.relativehumidity_2m[idx] : 0;
+      const visibility = Array.isArray(hourly.visibility) ? hourly.visibility[idx] : 10000;
+      const windSpeed = current.windspeed ?? (Array.isArray(hourly.windspeed_10m) ? hourly.windspeed_10m[idx] : 0);
+      const temperature = current.temperature ?? 0;
+
       return {
-        cloudCover: data.clouds?.all || 0,
-        visibility: data.visibility || 10000,
-        humidity: data.main?.humidity || 0,
-        temperature: data.main?.temp || 0,
-        windSpeed: data.wind?.speed || 0,
-        description: data.weather?.[0]?.description || '',
-        sunrise: data.sys?.sunrise,
-        sunset: data.sys?.sunset
+        cloudCover: typeof cloudCover === 'number' ? Math.round(cloudCover) : 0,
+        visibility: typeof visibility === 'number' ? visibility : 10000,
+        humidity: typeof humidity === 'number' ? Math.round(humidity) : 0,
+        temperature: typeof temperature === 'number' ? temperature : 0,
+        windSpeed: typeof windSpeed === 'number' ? windSpeed : 0,
+        description: 'Conditions from Open-Meteo',
+        sunrise: null,
+        sunset: null
       };
     } catch (error) {
       console.error('Error fetching weather data:', error);

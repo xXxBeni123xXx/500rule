@@ -145,4 +145,53 @@ export const LENS_DATABASE = [
 
   // Mount Adapters and Special Cases
   { id: 'rf-mount-adapter-ef-eos-r', brand: 'Canon', name: 'Mount Adapter EF-EOS R', mount: 'Canon RF', focal_length: 'Adapter', max_aperture: 'N/A', type: 'adapter', category: 'adapter', is_stabilized: false, weight: 110 },
+  
+  
+  // Additional Astrophotography-Specific Lenses
+  // Sigma Art Series (Excellent for Astro)
+  { id: 'sigma-14-f18-dg-hsm-art-canon', brand: 'Sigma', name: '14mm f/1.8 DG HSM Art', mount: 'Canon EF', focal_length: '14', max_aperture: 'f/1.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 1170, astro_recommended: true },
+  { id: 'sigma-14-f18-dg-hsm-art-nikon', brand: 'Sigma', name: '14mm f/1.8 DG HSM Art', mount: 'Nikon F', focal_length: '14', max_aperture: 'f/1.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 1170, astro_recommended: true },
+  { id: 'sigma-14-f18-dg-hsm-art-sony', brand: 'Sigma', name: '14mm f/1.8 DG HSM Art', mount: 'Sony E', focal_length: '14', max_aperture: 'f/1.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 1170, astro_recommended: true },
+  { id: 'sigma-20-f14-dg-hsm-art-canon', brand: 'Sigma', name: '20mm f/1.4 DG HSM Art', mount: 'Canon EF', focal_length: '20', max_aperture: 'f/1.4', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 950, astro_recommended: true },
+  { id: 'sigma-20-f14-dg-hsm-art-nikon', brand: 'Sigma', name: '20mm f/1.4 DG HSM Art', mount: 'Nikon F', focal_length: '20', max_aperture: 'f/1.4', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 950, astro_recommended: true },
+  { id: 'sigma-28-f14-dg-hsm-art-canon', brand: 'Sigma', name: '28mm f/1.4 DG HSM Art', mount: 'Canon EF', focal_length: '28', max_aperture: 'f/1.4', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 865, astro_recommended: true },
+  { id: 'sigma-40-f14-dg-hsm-art-canon', brand: 'Sigma', name: '40mm f/1.4 DG HSM Art', mount: 'Canon EF', focal_length: '40', max_aperture: 'f/1.4', type: 'prime', category: 'standard', is_stabilized: false, weight: 1200, astro_recommended: true },
+  { id: 'sigma-14-24-f28-dg-dn-art-sony', brand: 'Sigma', name: '14-24mm f/2.8 DG DN Art', mount: 'Sony E', focal_length: '14-24', max_aperture: 'f/2.8', type: 'zoom', category: 'wide-angle', is_stabilized: false, weight: 795, astro_recommended: true },
+  { id: 'sigma-14-24-f28-dg-dn-art-l', brand: 'Sigma', name: '14-24mm f/2.8 DG DN Art', mount: 'Leica L', focal_length: '14-24', max_aperture: 'f/2.8', type: 'zoom', category: 'wide-angle', is_stabilized: false, weight: 795, astro_recommended: true },
+  
+  // Tamron Astro Lenses
+  { id: 'tamron-15-30-f28-di-vc-usd-g2-canon', brand: 'Tamron', name: 'SP 15-30mm f/2.8 Di VC USD G2', mount: 'Canon EF', focal_length: '15-30', max_aperture: 'f/2.8', type: 'zoom', category: 'wide-angle', is_stabilized: true, weight: 1110, astro_recommended: true },
+  { id: 'tamron-15-30-f28-di-vc-usd-g2-nikon', brand: 'Tamron', name: 'SP 15-30mm f/2.8 Di VC USD G2', mount: 'Nikon F', focal_length: '15-30', max_aperture: 'f/2.8', type: 'zoom', category: 'wide-angle', is_stabilized: true, weight: 1110, astro_recommended: true },
+  { id: 'tamron-17-28-f28-di-iii-rxd-sony', brand: 'Tamron', name: '17-28mm f/2.8 Di III RXD', mount: 'Sony E', focal_length: '17-28', max_aperture: 'f/2.8', type: 'zoom', category: 'wide-angle', is_stabilized: false, weight: 420, astro_recommended: true },
+  { id: 'tamron-35-f14-di-usd-canon', brand: 'Tamron', name: 'SP 35mm f/1.4 Di USD', mount: 'Canon EF', focal_length: '35', max_aperture: 'f/1.4', type: 'prime', category: 'standard', is_stabilized: false, weight: 805, astro_recommended: true },
+  { id: 'tamron-35-f14-di-usd-nikon', brand: 'Tamron', name: 'SP 35mm f/1.4 Di USD', mount: 'Nikon F', focal_length: '35', max_aperture: 'f/1.4', type: 'prime', category: 'standard', is_stabilized: false, weight: 805, astro_recommended: true },
+  
+  // Tokina Astro Lenses
+  { id: 'tokina-11-20-f28-atx-pro-dx-canon', brand: 'Tokina', name: 'AT-X 11-20mm f/2.8 PRO DX', mount: 'Canon EF', focal_length: '11-20', max_aperture: 'f/2.8', type: 'zoom', category: 'wide-angle', is_stabilized: false, weight: 560, astro_recommended: true },
+  { id: 'tokina-11-20-f28-atx-pro-dx-nikon', brand: 'Tokina', name: 'AT-X 11-20mm f/2.8 PRO DX', mount: 'Nikon F', focal_length: '11-20', max_aperture: 'f/2.8', type: 'zoom', category: 'wide-angle', is_stabilized: false, weight: 560, astro_recommended: true },
+  { id: 'tokina-14-20-f2-atx-pro-dx-canon', brand: 'Tokina', name: 'AT-X 14-20mm f/2 PRO DX', mount: 'Canon EF', focal_length: '14-20', max_aperture: 'f/2', type: 'zoom', category: 'wide-angle', is_stabilized: false, weight: 725, astro_recommended: true },
+  
+  // Irix Astro Lenses
+  { id: 'irix-15-f24-firefly-canon', brand: 'Irix', name: '15mm f/2.4 Firefly', mount: 'Canon EF', focal_length: '15', max_aperture: 'f/2.4', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 410, astro_recommended: true },
+  { id: 'irix-15-f24-firefly-nikon', brand: 'Irix', name: '15mm f/2.4 Firefly', mount: 'Nikon F', focal_length: '15', max_aperture: 'f/2.4', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 410, astro_recommended: true },
+  { id: 'irix-11-f4-blackstone-canon', brand: 'Irix', name: '11mm f/4 Blackstone', mount: 'Canon EF', focal_length: '11', max_aperture: 'f/4', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 730, astro_recommended: true },
+  { id: 'irix-11-f4-blackstone-nikon', brand: 'Irix', name: '11mm f/4 Blackstone', mount: 'Nikon F', focal_length: '11', max_aperture: 'f/4', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 730, astro_recommended: true },
+  
+  // Laowa Ultra-Wide Astro Lenses
+  { id: 'laowa-9-f28-zero-d-sony', brand: 'Laowa', name: '9mm f/2.8 Zero-D', mount: 'Sony E', focal_length: '9', max_aperture: 'f/2.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 215, astro_recommended: true },
+  { id: 'laowa-9-f28-zero-d-fuji', brand: 'Laowa', name: '9mm f/2.8 Zero-D', mount: 'Fujifilm X', focal_length: '9', max_aperture: 'f/2.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 215, astro_recommended: true },
+  { id: 'laowa-12-f28-zero-d-canon', brand: 'Laowa', name: '12mm f/2.8 Zero-D', mount: 'Canon EF', focal_length: '12', max_aperture: 'f/2.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 609, astro_recommended: true },
+  { id: 'laowa-12-f28-zero-d-nikon', brand: 'Laowa', name: '12mm f/2.8 Zero-D', mount: 'Nikon F', focal_length: '12', max_aperture: 'f/2.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 609, astro_recommended: true },
+  { id: 'laowa-15-f2-zero-d-sony', brand: 'Laowa', name: '15mm f/2 Zero-D', mount: 'Sony E', focal_length: '15', max_aperture: 'f/2', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 500, astro_recommended: true },
+  { id: 'laowa-17-f18-mft', brand: 'Laowa', name: '17mm f/1.8 MFT', mount: 'Micro Four Thirds', focal_length: '17', max_aperture: 'f/1.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 172, astro_recommended: true },
+  
+  // Zeiss Astro Lenses
+  { id: 'zeiss-milvus-15-f28-canon', brand: 'Zeiss', name: 'Milvus 15mm f/2.8', mount: 'Canon EF', focal_length: '15', max_aperture: 'f/2.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 947, astro_recommended: true },
+  { id: 'zeiss-milvus-15-f28-nikon', brand: 'Zeiss', name: 'Milvus 15mm f/2.8', mount: 'Nikon F', focal_length: '15', max_aperture: 'f/2.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 947, astro_recommended: true },
+  { id: 'zeiss-batis-18-f28-sony', brand: 'Zeiss', name: 'Batis 18mm f/2.8', mount: 'Sony E', focal_length: '18', max_aperture: 'f/2.8', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 330, astro_recommended: true },
+  { id: 'zeiss-batis-25-f2-sony', brand: 'Zeiss', name: 'Batis 25mm f/2', mount: 'Sony E', focal_length: '25', max_aperture: 'f/2', type: 'prime', category: 'wide-angle', is_stabilized: false, weight: 335, astro_recommended: true },
+  
+  // Venus Optics Specialty
+  { id: 'venus-argus-35-f095-ff-canon', brand: 'Venus Optics', name: 'Argus 35mm f/0.95 FF', mount: 'Canon RF', focal_length: '35', max_aperture: 'f/0.95', type: 'prime', category: 'standard', is_stabilized: false, weight: 755, astro_recommended: true },
+  { id: 'venus-argus-35-f095-ff-sony', brand: 'Venus Optics', name: 'Argus 35mm f/0.95 FF', mount: 'Sony E', focal_length: '35', max_aperture: 'f/0.95', type: 'prime', category: 'standard', is_stabilized: false, weight: 755, astro_recommended: true },
 ]; 

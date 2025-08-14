@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Lightbulb, AlertCircle, CheckCircle, Info, Star } from 'lucide-react';
+import { Lightbulb, AlertCircle, CheckCircle, Info, Star, Sparkles, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import axios from 'axios';
 
 interface SmartTipsProps {
   focalLength?: number;
   cropFactor?: number;
-  currentCamera?: string;
-  currentLens?: string;
+  currentCamera?: any;
+  currentLens?: any;
   maxShutter?: number | null;
   trailRisk?: string | null;
   weatherConditions?: any;
@@ -15,10 +16,11 @@ interface SmartTipsProps {
 }
 
 interface Tip {
-  type: 'success' | 'warning' | 'info' | 'tip';
+  type: 'success' | 'warning' | 'info' | 'tip' | 'ai';
   title: string;
   message: string;
   priority: number;
+  source?: 'ai' | 'system';
 }
 
 export function SmartTips({ 
@@ -33,10 +35,51 @@ export function SmartTips({
   location
 }: SmartTipsProps) {
   const [tips, setTips] = useState<Tip[]>([]);
+  const [aiTips, setAiTips] = useState<Tip[]>([]);
+  const [loadingAiTips, setLoadingAiTips] = useState(false);
 
   useEffect(() => {
     generateTips();
   }, [focalLength, cropFactor, currentCamera, currentLens, maxShutter, trailRisk, weatherConditions, moonPhase]);
+
+  useEffect(() => {
+    if (currentCamera && currentLens) {
+      fetchAiTips();
+    }
+  }, [currentCamera, currentLens, location, weatherConditions, moonPhase]);
+
+  const fetchAiTips = async () => {
+    if (!currentCamera || !currentLens) return;
+    
+    setLoadingAiTips(true);
+    try {
+      const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+      const response = await axios.post(`${baseURL}/ai/tips`, {
+        camera: typeof currentCamera === 'string' ? currentCamera : `${currentCamera.brand} ${currentCamera.name}`,
+        lens: typeof currentLens === 'string' ? currentLens : `${currentLens.brand} ${currentLens.name}`,
+        location: location,
+        skyConditions: {
+          moonPhase: moonPhase?.illumination,
+          weather: weatherConditions
+        }
+      });
+      
+      if (response.data.success && response.data.tips) {
+        const aiGeneratedTips = response.data.tips.map((tip: any, index: number) => ({
+          type: 'ai' as const,
+          title: tip.title || `AI Tip ${index + 1}`,
+          message: tip.description || tip.message || tip,
+          priority: 1,
+          source: 'ai' as const
+        }));
+        setAiTips(aiGeneratedTips);
+      }
+    } catch (error) {
+      console.error('Failed to fetch AI tips:', error);
+    } finally {
+      setLoadingAiTips(false);
+    }
+  };
 
   const generateTips = () => {
     const newTips: Tip[] = [];
@@ -228,6 +271,8 @@ export function SmartTips({
         return <Info className="h-4 w-4 text-blue-400" />;
       case 'tip':
         return <Lightbulb className="h-4 w-4 text-purple-400" />;
+      case 'ai':
+        return <Sparkles className="h-4 w-4 text-cyan-400" />;
     }
   };
 
@@ -241,6 +286,8 @@ export function SmartTips({
         return 'bg-blue-500/10 border-blue-400/30';
       case 'tip':
         return 'bg-purple-500/10 border-purple-400/30';
+      case 'ai':
+        return 'bg-cyan-500/10 border-cyan-400/30';
     }
   };
 
@@ -256,6 +303,41 @@ export function SmartTips({
       </div>
 
       <div className="space-y-3">
+        {/* AI Tips Section */}
+        {loadingAiTips && (
+          <div className="flex items-center gap-2 text-cyan-400 text-sm">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            <span>Generating AI-powered recommendations...</span>
+          </div>
+        )}
+        
+        {aiTips.length > 0 && (
+          <div className="mb-4">
+            <div className="flex items-center gap-2 mb-2">
+              <Sparkles className="h-4 w-4 text-cyan-400" />
+              <span className="text-sm font-medium text-cyan-300">AI-Powered Tips</span>
+            </div>
+            {aiTips.map((tip, idx) => (
+              <motion.div
+                key={`ai-${idx}`}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className={`p-4 rounded-lg border ${getColorClass(tip.type)} mb-2`}
+              >
+                <div className="flex items-start gap-3">
+                  {getIcon(tip.type)}
+                  <div className="flex-1">
+                    <div className="font-medium text-sm text-white mb-1">{tip.title}</div>
+                    <div className="text-xs text-slate-300">{tip.message}</div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
+        
+        {/* Regular Tips */}
         {tips.map((tip, idx) => (
           <motion.div
             key={idx}
