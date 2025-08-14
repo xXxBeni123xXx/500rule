@@ -1,9 +1,21 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera as CameraIcon, Circle as Lens, Calculator, Star, ChevronRight, Info, Zap, Search, X, HelpCircle } from 'lucide-react';
+import { Camera as CameraIcon, Circle as Lens, Calculator, Star, ChevronRight, Info, Zap, Search, X, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import { Camera, Lens as LensType, fetchCameras, fetchCompatibleLenses } from './services/api';
 import { parseFocalLength } from './utils/focal';
-import { calculateMaxShutter, formatShutterFraction, getTrailRisk, RuleConstant } from './utils/astro';
+import { 
+  calculateMaxShutter, 
+  formatShutterFraction, 
+  getTrailRisk, 
+  RuleConstant,
+  calculateNPFRule,
+  calculatePixelPitch,
+  getRecommendedISO
+} from './utils/astro';
+import { AstroConditions } from './components/AstroConditions';
+import { SessionExport } from './components/SessionExport';
+import { SmartTips } from './components/SmartTips';
+import { Settings } from './components/Settings';
 
 function App() {
   // State management
@@ -12,6 +24,8 @@ function App() {
   const [currentFocalLength, setCurrentFocalLength] = useState(24);
   const [manualFocalLength, setManualFocalLength] = useState<number | null>(null);
   const [ruleConstant, setRuleConstant] = useState<RuleConstant>(500);
+  const [ruleType, setRuleType] = useState<'simple' | 'npf'>('simple');
+  const [lensAperture, setLensAperture] = useState<number>(2.8);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -25,6 +39,9 @@ function App() {
   
   // Tab management
   const [activeTab, setActiveTab] = useState<'guided' | 'manual'>('guided');
+  
+  // Settings
+  const [showSettings, setShowSettings] = useState(false);
   
   // Manual parameters
   const [manualCropFactor, setManualCropFactor] = useState(1.5);
@@ -50,7 +67,7 @@ function App() {
     }
   }, [selectedCamera]);
 
-  // Update focal length when lens changes
+  // Update focal length and aperture when lens changes
   useEffect(() => {
     if (selectedLens) {
       const parsed = parseFocalLength(selectedLens.focal_length);
@@ -58,6 +75,14 @@ function App() {
         setCurrentFocalLength(parsed.min);
       }
       setManualFocalLength(null);
+      
+      // Update aperture for NPF rule
+      if (selectedLens.max_aperture) {
+        const aperture = selectedLens.max_aperture.replace(/[^0-9.]/g, '');
+        if (aperture) {
+          setLensAperture(parseFloat(aperture));
+        }
+      }
     }
   }, [selectedLens]);
 
@@ -177,8 +202,19 @@ function App() {
      parseFocalLength(selectedLens.focal_length)?.min || 50) : null);
   
   const cropFactor = selectedCamera?.crop_factor || null;
-  const maxShutter = effectiveFocalLength && cropFactor ? 
-    calculateMaxShutter(effectiveFocalLength, cropFactor, ruleConstant) : null;
+  
+  // Calculate max shutter based on selected rule type
+  let maxShutter: number | null = null;
+  if (effectiveFocalLength && cropFactor) {
+    if (ruleType === 'simple') {
+      maxShutter = calculateMaxShutter(effectiveFocalLength, cropFactor, ruleConstant);
+    } else if (ruleType === 'npf' && selectedCamera) {
+      const pixelPitch = selectedCamera.megapixels && selectedCamera.sensor_width && selectedCamera.sensor_height
+        ? calculatePixelPitch(selectedCamera.sensor_width, selectedCamera.sensor_height, selectedCamera.megapixels)
+        : 4.3; // Default pixel pitch
+      maxShutter = calculateNPFRule(effectiveFocalLength, lensAperture, pixelPitch || 4.3, 0);
+    }
+  }
 
   const trailRisk = effectiveFocalLength && cropFactor ? 
     getTrailRisk(effectiveFocalLength, cropFactor) : null;
@@ -225,6 +261,15 @@ function App() {
           <p className="text-xl text-slate-300 max-w-2xl mx-auto px-4">
             Professional astrophotography exposure calculator with smart camera-lens compatibility
           </p>
+          <div className="mt-2 text-sm text-slate-400">
+            Version 2.4.0 | NPF Rule | Smart Tips | 500+ Equipment Database
+          </div>
+          <button
+            onClick={() => setShowSettings(true)}
+            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
+          >
+            <SettingsIcon className="h-5 w-5 text-white" />
+          </button>
         </motion.div>
       </header>
 
@@ -279,9 +324,14 @@ function App() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
           >
-            <div className="flex items-center gap-3 mb-6">
-              <CameraIcon className="h-6 w-6 text-blue-400" />
-              <h2 className="text-xl font-semibold text-white">Select Camera</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <CameraIcon className="h-6 w-6 text-blue-400" />
+                <h2 className="text-xl font-semibold text-white">Select Camera</h2>
+              </div>
+              <span className="text-xs text-slate-400">
+                {allCameras.length} cameras
+              </span>
             </div>
 
             {/* Camera Search */}
@@ -357,9 +407,16 @@ function App() {
             transition={{ duration: 0.6, delay: 0.4 }}
             className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
           >
-            <div className="flex items-center gap-3 mb-6">
-              <Lens className="h-6 w-6 text-purple-400" />
-              <h2 className="text-xl font-semibold text-white">Compatible Lenses</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <Lens className="h-6 w-6 text-purple-400" />
+                <h2 className="text-xl font-semibold text-white">Compatible Lenses</h2>
+              </div>
+              {selectedCamera && (
+                <span className="text-xs text-slate-400">
+                  {allCompatibleLenses.length} lenses
+                </span>
+              )}
             </div>
 
             {/* Lens Search - only show when camera is selected */}
@@ -531,10 +588,10 @@ function App() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   className="space-y-6"
                 >
-                  {/* Rule Toggle */}
-                  <div className="space-y-2">
+                  {/* Rule Type Selection */}
+                  <div className="space-y-3">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm text-slate-300">Exposure Rule</span>
+                      <span className="text-sm text-slate-300">Calculation Method</span>
                       <div className="relative">
                         <button
                           onMouseEnter={() => setShowRuleTooltip(true)}
@@ -544,29 +601,82 @@ function App() {
                           <HelpCircle className="h-4 w-4" />
                         </button>
                         {showRuleTooltip && (
-                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-3 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 z-10">
-                            <div className="mb-2"><strong>500 Rule:</strong> Conservative, minimizes star trails</div>
-                            <div><strong>400 Rule:</strong> Shorter exposures, better for longer focal lengths</div>
-                            <div className="mt-2 text-slate-400">Formula: Rule ÷ (focal length × crop factor)</div>
+                          <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-96 p-4 bg-slate-800 border border-slate-600 rounded-lg text-xs text-slate-200 z-10">
+                            <div className="space-y-3">
+                              <div>
+                                <strong className="text-blue-300">Simple Rules (500/400/300/200):</strong>
+                                <div className="mt-1 text-slate-300">Traditional rules based on focal length and crop factor. Easy to remember and calculate in the field.</div>
+                                <div className="mt-1 text-slate-400">• 500: Best for wide angle (14-35mm)</div>
+                                <div className="text-slate-400">• 400: Good for normal lenses (35-85mm)</div>
+                                <div className="text-slate-400">• 300/200: For telephoto lenses (&gt;85mm)</div>
+                              </div>
+                              <div>
+                                <strong className="text-purple-300">NPF Rule (Recommended):</strong>
+                                <div className="mt-1 text-slate-300">Most accurate for modern high-resolution sensors. Accounts for aperture, pixel density, and optical characteristics.</div>
+                                <div className="mt-1 text-slate-400">Formula: (35 × aperture + 30 × pixel pitch) ÷ focal length</div>
+                                <div className="mt-1 text-green-400">✓ Best for cameras with 20+ megapixels</div>
+                                <div className="text-green-400">✓ Prevents pixel-level star trails</div>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      {[500, 400].map((rule) => (
+                    
+                    {/* Rule Type Tabs */}
+                    <div className="flex gap-2 mb-3">
+                      {(['simple', 'npf'] as const).map((type) => (
                         <button
-                          key={rule}
-                          onClick={() => setRuleConstant(rule as RuleConstant)}
-                          className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all ${
-                            ruleConstant === rule
-                              ? 'bg-blue-500 text-white'
+                          key={type}
+                          onClick={() => setRuleType(type)}
+                          className={`flex-1 py-2 px-3 rounded-lg font-medium text-sm transition-all ${
+                            ruleType === type
+                              ? 'bg-purple-500 text-white'
                               : 'bg-white/10 text-slate-300 hover:bg-white/20'
                           }`}
                         >
-                          {rule} Rule
+                          {type === 'simple' ? 'Simple Rules' : 'NPF Rule'}
                         </button>
                       ))}
                     </div>
+                    
+                    {/* Simple Rules Options */}
+                    {ruleType === 'simple' && (
+                      <div className="grid grid-cols-4 gap-2">
+                        {([500, 400, 300, 200] as const).map((rule) => (
+                          <button
+                            key={rule}
+                            onClick={() => setRuleConstant(rule)}
+                            className={`py-2 px-3 rounded-lg font-medium text-sm transition-all ${
+                              ruleConstant === rule
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                            }`}
+                          >
+                            {rule}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* NPF Rule Inputs */}
+                    {ruleType === 'npf' && selectedLens && (
+                      <div className="space-y-2">
+                        <div>
+                          <label className="text-xs text-slate-400">Aperture (f-stop)</label>
+                          <input
+                            type="number"
+                            value={lensAperture}
+                            onChange={(e) => setLensAperture(parseFloat(e.target.value) || 2.8)}
+                            step="0.1"
+                            min="1"
+                            max="22"
+                            className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm"
+                            placeholder="e.g., 2.8"
+                          />
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Main Result */}
@@ -584,8 +694,19 @@ function App() {
                   {/* Formula */}
                   <div className="bg-white/5 rounded-lg p-4">
                     <div className="text-sm text-slate-300 mb-1">Formula:</div>
-                    <div className="font-mono text-white">
-                      {ruleConstant} ÷ ({effectiveFocalLength}mm × {cropFactor}) = {maxShutter?.toFixed(2)}s
+                    <div className="font-mono text-white text-sm">
+                      {ruleType === 'simple' && (
+                        <>{ruleConstant} ÷ ({effectiveFocalLength}mm × {cropFactor}) = {maxShutter?.toFixed(2)}s</>
+                      )}
+                      {ruleType === 'npf' && selectedCamera && (
+                        <>
+                          NPF = (35 × {lensAperture} + 30 × {
+                            selectedCamera.megapixels && selectedCamera.sensor_width && selectedCamera.sensor_height
+                              ? (calculatePixelPitch(selectedCamera.sensor_width, selectedCamera.sensor_height, selectedCamera.megapixels) || 4.3).toFixed(1)
+                              : '4.3'
+                          }μm) ÷ {effectiveFocalLength}mm = {maxShutter?.toFixed(2)}s
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -790,7 +911,62 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* New Features Section */}
+        <div className="mt-12 space-y-8">
+          {/* First Row: Astro Conditions and Session Export */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Astro Conditions */}
+            <motion.div
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              <AstroConditions />
+            </motion.div>
+
+            {/* Session Export */}
+            {(selectedCamera && selectedLens && effectiveFocalLength && cropFactor) && (
+              <motion.div
+                initial={{ y: 50, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                transition={{ duration: 0.6, delay: 1 }}
+                className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
+              >
+                <SessionExport 
+                  sessionData={{
+                    camera: selectedCamera,
+                    lens: selectedLens,
+                    focalLength: effectiveFocalLength,
+                    shutterSpeed: maxShutter,
+                    ruleConstant: activeTab === 'guided' ? ruleConstant : manualRule,
+                    trailRisk: trailRisk || 'unknown'
+                  }}
+                />
+              </motion.div>
+            )}
+          </div>
+
+          {/* Second Row: Smart Tips */}
+          <motion.div
+            initial={{ y: 50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.6, delay: 1.2 }}
+          >
+            <SmartTips 
+              focalLength={effectiveFocalLength || undefined}
+              cropFactor={cropFactor || undefined}
+              currentCamera={selectedCamera ? `${selectedCamera.brand} ${selectedCamera.name}` : undefined}
+              currentLens={selectedLens ? `${selectedLens.brand} ${selectedLens.name}` : undefined}
+              maxShutter={maxShutter}
+              trailRisk={trailRisk}
+            />
+          </motion.div>
+        </div>
       </main>
+      
+      {/* Settings Modal */}
+      <Settings isOpen={showSettings} onClose={() => setShowSettings(false)} />
     </div>
   );
 }

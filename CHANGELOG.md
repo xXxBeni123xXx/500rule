@@ -2,6 +2,138 @@
 
 All notable changes to the 500-Rule Astrophotography Calculator project.
 
+## [2.4.0] - 2024-01-16
+
+### 🎯 Improvements & Fixes
+
+#### UI Enhancements
+- **Camera/Lens Count Display**: Shows total count of cameras and lenses even when not searching
+- **Removed Simplified Rule**: Streamlined to Simple Rules and NPF Rule only
+- **Enhanced Tooltips**: More detailed explanations for calculation methods with recommendations
+
+#### Smart Tips System
+- **Replaced Equipment Suggestions**: New contextual tips based on YOUR equipment
+- **Dynamic Recommendations**: Tips change based on camera, lens, exposure time, and conditions
+- **Best Practices**: Includes focus tips, ISO recommendations, and shooting strategies
+- **Quick Reference**: Added handy reference for white balance, file format, etc.
+
+#### Location Features
+- **Expanded Dark Sky Database**: 24 locations worldwide (was 8)
+  - North America: 10 locations
+  - Europe: 6 locations
+  - Southern Hemisphere: 5 locations
+  - Asia: 3 locations
+- **Better Sorting**: Locations sorted by distance from selected location
+
+#### Bug Fixes
+- **Service Worker**: Fixed chrome-extension request errors
+- **PWA Manifest**: Fixed deprecated meta tags
+- **Icon Loading**: Resolved manifest icon loading issues
+
+### 🔧 Technical Improvements
+- **Cleaner Code**: Removed unnecessary components
+- **Better Error Handling**: Improved service worker error handling
+- **Performance**: Optimized location calculations
+
+## [2.3.0] - 2024-01-16
+
+### 🎯 Major Improvements
+
+#### Dynamic Formula Display
+- **Live Formula Updates**: Formula display changes based on selected calculation method
+- **NPF Formula**: Shows full NPF calculation with pixel pitch
+- **Simplified Formula**: Shows 300-rule calculation
+- **Auto-Aperture**: Aperture automatically updates when changing lenses
+
+#### Enhanced Settings Panel
+- **API Key Management**: 
+  - User can override built-in API keys
+  - Visual status indicators for each API
+  - Secure key storage in localStorage
+  - Hide/show toggle for sensitive data
+- **General Settings**:
+  - Dark mode toggle
+  - Auto-location detection toggle
+  - Cache control settings
+
+#### Location Features Enhanced
+- **Sorted Dark Sky Locations**: Popular locations now sorted by distance from user
+- **Distance Display**: Shows distance in km for each dark sky location
+- **Date/Time Picker**: Select future dates/times for condition forecasts (up to 7 days)
+- **Better Location Search**: Improved OpenStreetMap integration
+
+#### Progressive Web App (PWA)
+- **Offline Support**: App works without internet connection
+- **Installable**: Can be installed on desktop and mobile devices
+- **Service Worker**: Caches resources for offline use
+- **App Manifest**: Full PWA compliance with icons and metadata
+
+#### Mobile Optimizations
+- **Responsive Design**: Better layout on small screens
+- **Touch Targets**: Minimum 44px touch targets for accessibility
+- **Viewport Settings**: Optimized for mobile browsers
+- **Grid Stacking**: Columns stack on mobile devices
+
+### 🔧 Technical Improvements
+- **Version Display**: Shows v2.3.0 in UI header
+- **API Integration**: Built-in API keys for immediate functionality
+- **Error Handling**: Better API failure management
+- **Performance**: Optimized calculations and rendering
+
+### 🐛 Bug Fixes
+- Fixed formula display not updating with rule changes
+- Fixed aperture not updating when lens changes
+- Fixed location sorting issues
+- Improved mobile viewport settings
+
+## [2.2.0] - 2024-01-16
+
+### 🎯 New Features
+
+#### Enhanced Exposure Rules
+- **Multiple Rule Types**: Added support for Simple (500/400/300/200), NPF, and Simplified rules
+- **NPF Rule Calculator**: Most accurate for modern high-resolution sensors
+  - Accounts for aperture, pixel pitch, and declination
+  - Automatic pixel pitch calculation from sensor specs
+- **Rule Type Selector**: Easy switching between calculation methods
+- **200 and 300 Rules**: Added for telephoto and conservative calculations
+
+#### Location Features
+- **Simple Location Picker**: No Google Maps dependency required
+  - Current GPS location detection
+  - Search by city/landmark using OpenStreetMap
+  - Manual coordinate input
+  - Popular dark sky locations preset
+- **Dark Sky Map** (with Google Maps API):
+  - Interactive map with best observation locations
+  - Light pollution overlay
+  - Distance calculations from user location
+
+#### Smart Equipment Suggestions
+- **Context-Aware Recommendations**:
+  - Camera upgrade suggestions based on current setup
+  - Lens recommendations for astrophotography
+  - Essential accessories (star trackers, filters, etc.)
+  - Price and rating information
+- **Pro Tips**: Contextual advice for better results
+
+#### UI/UX Improvements
+- **Version Display**: Shows current version in header
+- **Better Organization**: Improved layout with feature sections
+- **Enhanced Tooltips**: More detailed explanations for all rules
+- **Responsive Grid**: Better mobile and tablet experience
+
+### 🔧 Technical Improvements
+- **Modular Components**: Separated location and suggestion features
+- **TypeScript Enhancements**: Better type safety throughout
+- **API Flexibility**: Works without Google Maps API
+- **Performance**: Optimized calculations and rendering
+
+### 📝 Documentation
+- **Comprehensive API Setup Guide**: Step-by-step for all APIs
+- **Updated README**: Complete feature list and setup instructions
+- **Version Tracking**: Proper semantic versioning
+
 ## [2.1.0] - 2024-01-15
 
 ### 🎯 Fixed

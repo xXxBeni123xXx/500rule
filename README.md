@@ -1,8 +1,8 @@
 # 🌟 500-Rule Astrophotography Calculator
 
-A professional, full-stack web application for calculating optimal exposure times for astrophotography using the 500-rule and 400-rule methods. Features intelligent camera-lens compatibility matching, comprehensive equipment database, and advanced search capabilities.
+A professional, full-stack web application for calculating optimal exposure times for astrophotography using multiple calculation methods including the 500-rule, NPF rule, and more. Features intelligent camera-lens compatibility matching, comprehensive equipment database, location-based weather conditions, and smart equipment suggestions.
 
-![500-Rule Calculator](https://img.shields.io/badge/Version-2.0-blue.svg)
+![500-Rule Calculator](https://img.shields.io/badge/Version-2.3.0-blue.svg)
 ![License](https://img.shields.io/badge/License-MIT-green.svg)
 ![Node.js](https://img.shields.io/badge/Node.js-18+-brightgreen.svg)
 ![React](https://img.shields.io/badge/React-18-blue.svg)
@@ -10,11 +10,15 @@ A professional, full-stack web application for calculating optimal exposure time
 ## ✨ Features
 
 ### 🎯 Core Functionality
-- **500/400 Rule Calculations**: Precise exposure time calculations to prevent star trails
+- **Multiple Calculation Methods**: 
+  - Traditional 500/400/300/200 rules
+  - NPF Rule for modern high-resolution sensors
+  - Simplified 300-rule for quick field calculations
 - **Smart Camera-Lens Matching**: Automatic compatibility detection based on mount types
 - **Dual Interface**: Guided selection with equipment picker OR manual parameter input
 - **Real-time Calculations**: Instant updates as you change parameters
 - **Trail Risk Assessment**: Visual indicators for star trail probability
+- **ISO Recommendations**: Smart ISO suggestions based on conditions
 
 ### 🔍 Advanced Search
 - **Intelligent Filtering**: Search by brand, model, focal length, aperture
@@ -36,11 +40,30 @@ A professional, full-stack web application for calculating optimal exposure time
 - **Fixed Lens Cameras**: X100 series, Leica Q2 with built-in lens specifications
 - **Mount Compatibility**: Automatic lens filtering based on camera mount
 
+### 🌍 Location & Weather Features (v2.2.0)
+- **Location Picker**: 
+  - Current GPS location detection
+  - Search by city/landmark name
+  - Manual coordinate input
+  - Popular dark sky locations
+- **Weather Conditions**: Real-time astronomy conditions
+- **Moon Phase Tracking**: Current moon phase and illumination
+- **Aurora Forecast**: KP index and visibility predictions
+
+### 💡 Smart Features (v2.2.0)
+- **Equipment Suggestions**: 
+  - Camera upgrade recommendations
+  - Lens suggestions based on your setup
+  - Essential accessories for astrophotography
+  - Filter recommendations
+- **Session Export**: Export your session plan as text, JSON, or calendar event
+- **Pro Tips**: Context-aware tips and best practices
+
 ## 🚀 Quick Start
 
 ### Prerequisites
 - **Node.js 18+** and **npm**
-- **RapidAPI Key** (optional, app works with fallback data)
+- **API Keys** (optional, app works without them but with limited features)
 
 ### Installation
 
@@ -55,10 +78,10 @@ A professional, full-stack web application for calculating optimal exposure time
    npm install
    ```
 
-3. **Set up environment variables** (optional)
+3. **Set up environment variables** (optional but recommended)
    ```bash
    cp env.example .env.local
-   # Edit .env.local with your RapidAPI key
+   # Edit .env.local with your API keys (see API Setup section below)
    ```
 
 4. **Start the development server**
@@ -69,6 +92,91 @@ A professional, full-stack web application for calculating optimal exposure time
 5. **Open your browser**
    - Frontend: http://localhost:5173
    - Backend API: http://localhost:3001
+
+## 🔑 API Setup Guide
+
+The app works without API keys but you'll get enhanced features with them. Here's how to set up each one:
+
+### 1. OpenWeatherMap API (Weather Conditions)
+**Features**: Real-time weather, visibility, humidity, cloud cover
+
+1. Go to [OpenWeatherMap](https://openweathermap.org/api)
+2. Sign up for a free account
+3. Get your API key from the dashboard
+4. Add to `.env.local`:
+   ```
+   OPENWEATHER_API_KEY=your_key_here
+   ```
+
+### 2. Google Maps API (Location Features)
+**Features**: Interactive maps, place search, dark sky locations
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Enable these APIs:
+   - Maps JavaScript API
+   - Places API
+   - Geocoding API
+4. Create credentials (API Key)
+5. Add to `.env.local`:
+   ```
+   VITE_GOOGLE_MAPS_API_KEY=your_key_here
+   ```
+
+### 3. RapidAPI (Camera Database)
+**Features**: Extended camera/lens database
+
+1. Go to [RapidAPI](https://rapidapi.com/)
+2. Subscribe to a camera database API
+3. Get your API key
+4. Add to `.env.local`:
+   ```
+   RAPIDAPI_KEY=your_key_here
+   VITE_RAPIDAPI_KEY=your_key_here
+   ```
+
+### 4. Flickr API (Equipment Data)
+**Features**: Real-world equipment usage statistics
+
+1. Go to [Flickr API](https://www.flickr.com/services/api/)
+2. Create an app
+3. Get your API key
+4. Add to `.env.local`:
+   ```
+   FLICKR_API_KEY=your_key_here
+   ```
+
+### 5. Unsplash API (Photo Metadata)
+**Features**: Photography metadata analysis
+
+1. Go to [Unsplash Developers](https://unsplash.com/developers)
+2. Create an application
+3. Get your access key
+4. Add to `.env.local`:
+   ```
+   UNSPLASH_ACCESS_KEY=your_key_here
+   ```
+
+### Complete `.env.local` Example:
+```env
+# Frontend API Configuration
+VITE_API_URL=http://localhost:3001/api
+VITE_RAPIDAPI_KEY=your_rapidapi_key_here
+VITE_GOOGLE_MAPS_API_KEY=your_google_maps_key_here
+
+# Backend Configuration
+PORT=3001
+RAPIDAPI_KEY=your_rapidapi_key_here
+
+# External APIs
+OPENWEATHER_API_KEY=your_openweather_key_here
+FLICKR_API_KEY=your_flickr_key_here
+UNSPLASH_ACCESS_KEY=your_unsplash_key_here
+
+# Security
+NODE_ENV=development
+CORS_ORIGIN=http://localhost:5173
+```
 
 ## 🏗️ Architecture
 

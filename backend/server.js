@@ -11,9 +11,14 @@ const PORT = process.env.PORT || 3001;
 
 // Environment variables
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || '';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
+const OPENWEATHER_API_KEY = process.env.OPENWEATHER_API_KEY || '';
 
 if (!RAPIDAPI_KEY) {
   console.warn('⚠️ WARNING: RAPIDAPI_KEY is not set. API features will be limited to local data.');
+}
+if (!OPENWEATHER_API_KEY) {
+  console.warn('OpenWeather API key not configured');
 }
 
 // CORS configuration
@@ -447,6 +452,35 @@ app.get('/api/equipment-suggestions', async (req, res) => {
       success: false,
       error: 'Failed to fetch equipment suggestions'
     });
+  }
+});
+
+// AI-powered tips endpoint (secure - backend only)
+app.post('/api/ai/tips', async (req, res) => {
+  try {
+    if (!OPENAI_API_KEY) {
+      return res.status(400).json({ success: false, error: 'OpenAI API key not configured on server' });
+    }
+    const { camera, lens, focalLength, cropFactor, exposureSeconds, conditions } = req.body || {};
+    const systemPrompt = `You are an expert astrophotography assistant. Provide short, actionable tips (max 5) for night sky shooting.
+Context: equipment, exposure, risk, weather, moon, aurora. Avoid generic advice. Prefer practical steps.`;
+    const userPrompt = JSON.stringify({ camera, lens, focalLength, cropFactor, exposureSeconds, conditions });
+    const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+      model: 'gpt-4o-mini',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ],
+      temperature: 0.5,
+      max_tokens: 300
+    }, {
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}` }
+    });
+    const text = response.data?.choices?.[0]?.message?.content || '';
+    res.json({ success: true, tips: text });
+  } catch (error) {
+    console.error('AI tips error:', error?.response?.data || error.message);
+    res.status(500).json({ success: false, error: 'Failed to generate AI tips' });
   }
 });
 

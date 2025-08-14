@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Cloud, Moon, Activity, MapPin, Wind, Droplets, Eye } from 'lucide-react';
+import { Cloud, Moon, Activity, MapPin, Wind, Droplets, Eye, Calendar, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import axios from 'axios';
+import { SimpleLocationPicker } from './SimpleLocationPicker';
+// import { DarkSkyMap } from './DarkSkyMap'; // Temporarily disabled until Google Maps API is configured
 
 interface WeatherData {
   cloudCover: number;
@@ -38,28 +40,18 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
   const [moonPhase, setMoonPhase] = useState<MoonPhaseData | null>(null);
   const [aurora, setAurora] = useState<AuroraData | null>(null);
   const [loading, setLoading] = useState(false);
-  const [location, setLocation] = useState({ lat: latitude || 0, lon: longitude || 0 });
-  const [showLocationInput, setShowLocationInput] = useState(!latitude || !longitude);
+  const [location, setLocation] = useState({ lat: latitude || 0, lng: longitude || 0 });
+  const [showDarkSkyMap, setShowDarkSkyMap] = useState(false);
+  const [showLocationPicker, setShowLocationPicker] = useState(!latitude || !longitude);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedTime, setSelectedTime] = useState(new Date().toTimeString().slice(0, 5));
 
   useEffect(() => {
-    if (location.lat && location.lon) {
+    if (location.lat && location.lng) {
       fetchConditions();
-    } else if (!showLocationInput) {
-      // Try to get user's location
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lon: position.coords.longitude
-          });
-        },
-        () => {
-          setShowLocationInput(true);
-        }
-      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.lat, location.lon]);
+  }, [location.lat, location.lng]);
 
   const fetchConditions = async () => {
     setLoading(true);
@@ -68,7 +60,7 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
       
       const [weatherRes, moonRes, auroraRes] = await Promise.allSettled([
         axios.get(`${baseURL}/weather`, {
-          params: { lat: location.lat, lon: location.lon }
+          params: { lat: location.lat, lon: location.lng }
         }),
         axios.get(`${baseURL}/moon-phase`),
         axios.get(`${baseURL}/aurora-forecast`)
@@ -134,40 +126,10 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
     }
   };
 
-  if (showLocationInput) {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700"
-      >
-        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2">
-          <MapPin className="w-5 h-5 text-blue-400" />
-          Enter Your Location
-        </h3>
-        <div className="flex gap-4">
-          <input
-            type="number"
-            placeholder="Latitude"
-            className="flex-1 px-3 py-2 bg-gray-700 rounded-lg text-white"
-            onChange={(e) => setLocation(prev => ({ ...prev, lat: parseFloat(e.target.value) }))}
-          />
-          <input
-            type="number"
-            placeholder="Longitude"
-            className="flex-1 px-3 py-2 bg-gray-700 rounded-lg text-white"
-            onChange={(e) => setLocation(prev => ({ ...prev, lon: parseFloat(e.target.value) }))}
-          />
-          <button
-            onClick={() => setShowLocationInput(false)}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-          >
-            Check Conditions
-          </button>
-        </div>
-      </motion.div>
-    );
-  }
+  const handleLocationSelect = (newLocation: { lat: number; lng: number; name?: string }) => {
+    setLocation(newLocation);
+    setShowLocationPicker(false);
+  };
 
   if (loading) {
     return (
@@ -180,17 +142,103 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
   const score = getConditionScore();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-gray-800/50 backdrop-blur-sm rounded-lg p-6 border border-gray-700"
-    >
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-xl font-semibold">Astrophotography Conditions</h3>
-        <div className={`text-3xl font-bold ${getScoreColor(score)}`}>
-          {score.toFixed(0)}%
-        </div>
-      </div>
+    <div className="space-y-6">
+      {/* Location Picker */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
+      >
+        <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+          <MapPin className="h-5 w-5 text-blue-400" />
+          Observation Location
+        </h3>
+        <SimpleLocationPicker 
+          onLocationSelect={handleLocationSelect}
+          initialLocation={location}
+        />
+        
+        {/* Toggle Dark Sky Map */}
+        <button
+          onClick={() => setShowDarkSkyMap(!showDarkSkyMap)}
+          className="mt-4 w-full px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 rounded-lg transition-colors flex items-center justify-center gap-2"
+        >
+          <Activity className="h-4 w-4" />
+          {showDarkSkyMap ? 'Hide' : 'Show'} Dark Sky Map
+        </button>
+      </motion.div>
+
+      {/* Dark Sky Map - Temporarily disabled until Google Maps API is configured */}
+      {/* {showDarkSkyMap && location.lat && location.lng && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
+        >
+          <DarkSkyMap 
+            userLocation={location}
+            onLocationSelect={(darkSkyLocation) => {
+              setLocation({ lat: darkSkyLocation.lat, lng: darkSkyLocation.lng });
+            }}
+          />
+        </motion.div>
+      )} */}
+
+      {/* Date/Time Selector */}
+      {location.lat && location.lng && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
+        >
+          <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-blue-400" />
+            Observation Date & Time
+          </h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="text-xs text-slate-400 block mb-1">Date</label>
+              <input
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                min={new Date().toISOString().split('T')[0]}
+                max={new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-slate-400 block mb-1">Time</label>
+              <input
+                type="time"
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+                className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white text-sm"
+              />
+            </div>
+          </div>
+          <button
+            onClick={fetchConditions}
+            className="mt-3 w-full py-2 bg-blue-500/20 hover:bg-blue-500/30 text-blue-300 rounded-lg text-sm transition-colors"
+          >
+            Update Conditions
+          </button>
+        </motion.div>
+      )}
+
+      {/* Conditions Display */}
+      {location.lat && location.lng && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white/10 backdrop-blur-lg rounded-2xl p-6 border border-white/20"
+        >
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-semibold text-white">Astrophotography Conditions</h3>
+            <div className={`text-3xl font-bold ${getScoreColor(score)}`}>
+              {score.toFixed(0)}%
+            </div>
+          </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Weather Card */}
@@ -302,6 +350,8 @@ export function AstroConditions({ latitude, longitude }: AstroConditionsProps) {
           )}
         </ul>
       </div>
-    </motion.div>
+        </motion.div>
+      )}
+    </div>
   );
 }
