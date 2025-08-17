@@ -1,7 +1,7 @@
-const CACHE_NAME = 'astrocalc-v2.4.0';
-const STATIC_CACHE = 'astrocalc-static-v2.4.0';
-const DYNAMIC_CACHE = 'astrocalc-dynamic-v2.4.0';
-const API_CACHE = 'astrocalc-api-v2.4.0';
+const CACHE_NAME = 'astrocalc-v2.5.0';
+const STATIC_CACHE = 'astrocalc-static-v2.5.0';
+const DYNAMIC_CACHE = 'astrocalc-dynamic-v2.5.0';
+const API_CACHE = 'astrocalc-api-v2.5.0';
 
 // Essential files to cache
 const staticAssets = [
@@ -96,11 +96,13 @@ self.addEventListener('fetch', (event) => {
             if (!response || response.status !== 200) {
               return response;
             }
-            
-            const responseToCache = response.clone();
-            caches.open(DYNAMIC_CACHE).then((cache) => {
-              cache.put(event.request, responseToCache);
-            });
+            // Only cache GET requests
+            if (event.request.method === 'GET') {
+              const responseToCache = response.clone();
+              caches.open(DYNAMIC_CACHE).then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            }
             
             return response;
           });
@@ -112,10 +114,9 @@ self.addEventListener('fetch', (event) => {
       fetch(event.request)
         .then((response) => {
           // Cache successful responses
-          if (response && response.status === 200) {
+          if (response && response.status === 200 && event.request.method === 'GET') {
             const responseToCache = response.clone();
             const cacheToUse = event.request.url.includes('/api/') ? API_CACHE : DYNAMIC_CACHE;
-            
             caches.open(cacheToUse).then((cache) => {
               cache.put(event.request, responseToCache);
             });

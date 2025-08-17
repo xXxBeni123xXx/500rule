@@ -61,7 +61,12 @@ export function LocationPicker({ onLocationSelect, initialLocation }: LocationPi
     loadGoogleMapsScript(apiKey)
       .then(() => {
         if (window.google?.maps) {
-          autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+          // Use the suggested AutocompleteSuggestion if available
+          if ((google.maps as any).places?.AutocompleteSuggestion) {
+            autocompleteServiceRef.current = new (google.maps as any).places.AutocompleteSuggestion();
+          } else if (google.maps.places?.AutocompleteService) {
+            autocompleteServiceRef.current = new google.maps.places.AutocompleteService();
+          }
         }
       })
       .catch(err => {
@@ -196,19 +201,26 @@ export function LocationPicker({ onLocationSelect, initialLocation }: LocationPi
         return;
       }
 
-      autocompleteServiceRef.current.getPlacePredictions(
-        {
-          input: query,
-          types: ['geocode']
-        },
-        (predictions, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
-            setSuggestions(predictions);
-          } else {
-            setSuggestions([]);
+      if ((autocompleteServiceRef.current as any)?.fetchSuggestions) {
+        // For AutocompleteSuggestion
+        (autocompleteServiceRef.current as any).fetchSuggestions({ input: query }).then((res: any) => {
+          setSuggestions(res?.suggestions || []);
+        }).catch(() => setSuggestions([]));
+      } else if (autocompleteServiceRef.current?.getPlacePredictions) {
+        autocompleteServiceRef.current.getPlacePredictions(
+          {
+            input: query,
+            types: ['geocode']
+          },
+          (predictions, status) => {
+            if (status === google.maps.places.PlacesServiceStatus.OK && predictions) {
+              setSuggestions(predictions);
+            } else {
+              setSuggestions([]);
+            }
           }
-        }
-      );
+        );
+      }
     }, 300),
     []
   );
